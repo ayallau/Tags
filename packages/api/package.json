@@ -1,0 +1,35 @@
+{
+  "name": "@tags/api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared API client for Tags monorepo",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "axios",
+    "api",
+    "client",
+    "http",
+    "monorepo"
+  ],
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@tags/eslint-config": "workspace:*",
+    "@tags/models": "workspace:*",
+    "@tags/tsconfig": "workspace:*",
+    "typescript": "^5.3.0"
+  }
+}
