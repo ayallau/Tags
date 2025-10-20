@@ -1,30 +1,5 @@
-## Development Configuration and Ports Policy
-
-### מטרת המסמך
-
-הנחיות קבועות לניהול פורטים והגדרות סביבת פיתוח עבור המונוריפו.
-קובצי `.env` ישמשו אך ורק לאחסון סודות (secrets).
-כל ההגדרות הלוגיות, הפורטים והנתיבים ינוהלו בתוך `config.ts`.
-
 ---
-
-### מדיניות פורטים לסביבת פיתוח
-
-Server (Express / Node):
-
-- HTTP: 3001
-- HTTPS: 3443
-
-Web (React / Vite):
-
-- HTTP: 5173
-- HTTPS: 5174
-
-Mobile (Expo / React Native):
-
-- HTTP: 8081
-- HTTPS: 8443
-
+alwaysApply: true
 ---
 
 ### מדיניות קבצי קונפיגורציה
