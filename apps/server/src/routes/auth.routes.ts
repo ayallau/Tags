@@ -10,7 +10,7 @@ import {
   globalLogout,
 } from "../controllers/authController.js";
 
-const router = Router();
+const router: Router = Router();
 
 // Email+Password
 router.post("/login", loginWithEmail);

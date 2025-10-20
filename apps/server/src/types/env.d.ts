@@ -13,6 +13,9 @@ declare global {
       PASSWORD_PEPPER: string;
       COOKIE_KEY: string;
       BCRYPT_ROUNDS?: string;
+      SSL_ENABLED?: string;
+      SSL_CERT_PATH?: string;
+      SSL_KEY_PATH?: string;
       // Email settings (optional)
       EMAIL_HOST?: string;
       EMAIL_PORT?: string;

@@ -8,6 +8,8 @@ import mongoose from "mongoose";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import swaggerUi from "swagger-ui-express";
+import https from "node:https";
+import fs from "node:fs";
 
 try {
   await mongoose.connect(config.MONGO_URI);
@@ -81,11 +83,36 @@ if (isDev) {
 }
 
 // Start the server
-const server = app.listen(config.PORT, (): void => {
-  console.log(`Server is running on URL http://localhost:${config.PORT}`);
-  if (isDev) {
-    console.log("➜ OpenAPI: /openapi.yaml | Swagger UI: /docs");
+let server: any;
+
+if (config.SSL_ENABLED) {
+  try {
+    const options = {
+      key: fs.readFileSync(config.SSL_KEY_PATH),
+      cert: fs.readFileSync(config.SSL_CERT_PATH),
+    };
+    
+    server = https.createServer(options, app).listen(config.PORT, (): void => {
+      console.log(`🚀 Server is running on HTTPS: https://localhost:${config.PORT}`);
+      console.log(`📱 Client URL: ${config.CLIENT_URL}`);
+      if (isDev) {
+        console.log("📚 OpenAPI: /openapi.yaml | Swagger UI: /docs");
+      }
+    });
+  } catch (error) {
+    console.error("❌ Failed to start HTTPS server:", error);
+    console.log("💡 Make sure SSL certificates exist in apps/server/certs/");
+    console.log("💡 Or run with HTTP: pnpm dev:http");
+    process.exit(1);
   }
-});
+} else {
+  server = app.listen(config.PORT, (): void => {
+    console.log(`🚀 Server is running on HTTP: http://localhost:${config.PORT}`);
+    console.log(`📱 Client URL: ${config.CLIENT_URL}`);
+    if (isDev) {
+      console.log("📚 OpenAPI: /openapi.yaml | Swagger UI: /docs");
+    }
+  });
+}
 
 export default server;

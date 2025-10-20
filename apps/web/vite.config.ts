@@ -4,6 +4,15 @@ import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 5173,
+    host: 'localhost',
+    // Support for HTTPS development
+    https: process.env.VITE_HTTPS === 'true' ? {
+      key: '../../apps/server/certs/server.key',
+      cert: '../../apps/server/certs/server.crt',
+    } : undefined,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
