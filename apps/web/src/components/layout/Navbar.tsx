@@ -25,6 +25,7 @@ export function Navbar() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors hover:text-primary',
                   'border-b-2 border-transparent hover:border-muted-foreground/20',
+                  'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background',
                   isActive ? 'text-primary border-primary' : 'text-muted-foreground'
                 )}
                 aria-current={isActive ? 'page' : undefined}
