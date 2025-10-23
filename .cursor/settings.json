@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "alwaysApply": [
+      "project_rules",
+      "project_guideline", 
+      "Recommended_Project_Plan",
+      "custom_prompts"
+    ],
+    "defaultPrompts": [
+      "תמיד ענה בעברית",
+      "בקש אישור לפני שינויים משמעותיים",
+      "השתמש ב-best practices",
+      "נקה קוד ישן אחרי שינויים"
+    ]
+  },
+  "prompts": {
+    "codeReview": "בדוק את הקוד הזה ותן המלצות לשיפור",
+    "writeTests": "כתוב טסטים מקיפים לפונקציה הזו",
+    "optimize": "בדוק את הביצועים של הקוד הזה ותן המלצות אופטימיזציה",
+    "document": "כתוב תיעוד מפורט לפונקציה/רכיב הזה"
+  }
+}

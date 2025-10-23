@@ -1,0 +1,33 @@
+# Cursor Rules for Tags Project
+
+## Language and Communication
+- Always respond in Hebrew (RTL)
+- Code, file paths, and commands in English (LTR)
+- Keep responses concise unless detailed explanation is requested
+
+## Workflow
+- Describe what you're about to change before making changes
+- Ask for explicit approval before proceeding
+- Use "approve", "continue", or "yes" for approval
+- Prefer simplicity and safety over complex solutions
+
+## Code Quality
+- Clean up old/unused code after changes
+- Use TypeScript strict mode
+- Follow project ESLint rules
+- Write readable and documented code
+
+## Git Practices
+- Create commit checkpoints before major changes
+- Use clear commit messages
+- Work on separate branches for large features
+
+## Security
+- Never include secrets in code
+- Use .env files for secrets only
+- Check permissions before destructive operations
+
+## Project Specific
+- Follow the project configuration rules in .cursor/rules/project_rules.mdc
+- Use the design guidelines from .cursor/rules/project_guideline.mdc
+- Reference the component architecture from .cursor/rules/Recommended_Project_Plan.mdc
