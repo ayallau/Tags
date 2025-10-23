@@ -1,3 +1,5 @@
+import { DemoControls } from '../components/dev/DemoControls';
+
 export default function HomePage() {
   return (
     <div className='space-y-6'>
@@ -5,6 +7,11 @@ export default function HomePage() {
         <h1 className='text-4xl font-bold text-foreground mb-4'>Welcome to Tags!</h1>
         <p className='text-lg text-muted-foreground'>Connect with people who share your interests</p>
       </div>
+
+      {/* Demo Controls - only in development */}
+      {import.meta.env.DEV && (
+        <DemoControls />
+      )}
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         <div className='bg-surface border border-border rounded-lg p-6'>
