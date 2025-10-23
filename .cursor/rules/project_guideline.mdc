@@ -1,0 +1,39 @@
+---
+description: Project Design Guidelines and Development Rules
+alwaysApply: true
+---
+
+## Design Reference
+- Attach: <Include appropriate image from .cursor\DesignReference>
+- Use the image strictly as visual inspiration (layout/spacing/feel), do NOT copy pixel-perfect.
+
+## Design Guardrails — MUST FOLLOW
+- **Tech Stack**: React + TypeScript + Vite, Tailwind + shadcn/ui, Radix primitives, Framer Motion (micro-animations only), React Router.
+- **Dark Mode**: Theme system with class="dark" (media fallback), color palettes through Tailwind tokens only.
+- **Spacing & Grid**: 4/8pt scale, modern grid/flex, clear typographic headings.
+- **Accessibility**: AA contrast, visible focus, aria-* where needed, keyboard trap=false.
+- **Responsiveness**: Mobile-first, standard Tailwind breakpoints.
+- **Motion**: Short and subtle; reduce/disable when prefers-reduced-motion.
+- **Performance**: Lazy loading (lazy routes), Skeletons for all loading screens, no layout shift.
+- **shadcn/ui**: Use existing components; extend only when required.
+
+## Repository Rules — MUST FOLLOW
+- **Environment Files**: No creation/update of .env files. If example needed — create .env.example only.
+- **Module System**: Maintain ESM + TS "NodeNext". Do not change base tsconfig without approval.
+- **Checkpoints**: Before major changes: perform commit checkpoint.
+
+## Task Guidelines
+- Describe briefly what you are about to change.
+- Execute only the current step. Do not jump to the next stage.
+- Provide Acceptance Criteria + brief manual tests.
+
+## Deliverables
+- List of files to be created/modified.
+- Complete code (LTR, left-aligned).
+- Manual tests and execution instructions.
+
+## Approval Process
+- If everything is correct, respond with "approve". Wait before writing to disk.
+
+
+

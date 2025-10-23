@@ -1,0 +1,532 @@
+---
+description: Recommended Project Plan and Component Architecture
+alwaysApply: true
+---
+## 1️⃣ רשימת רכיבי האפליקציה
+
+### 🧩 **App/Layout**
+| רכיב | תיאור |
+|-------|--------|
+| `AppLayout` | שלד ראשי: Header, Navbar, Content, Footer |
+| `Header` | לוגו, שם האפליקציה, תפריט משתמש |
+| `Navbar` | ניווט בין Discover / Matches / Friends / Chat |
+| `Footer` | תחתית כללית של האפליקציה |
+
+---
+
+### ⚙️ **Shared Components**
+| סוג | רכיבים עיקריים |
+|------|----------------|
+| **Display** | `UserCard`, `UserTitleTile`, `TagPill`, `List`, `Grid`, `Avatar`, `Badge`, `Tooltip`, `EmptyState`, `Skeleton` |
+| **Inputs** | `SearchInput`, `Select`, `Tabs`, `SortableGrid`, `Pagination` |
+| **Feedback / Overlays** | `Modal`, `Dialog`, `Toast`, `Snackbar`, `ConfirmDialog` |
+| **Menus** | `UserMenu`, `ContextMenu` |
+| **Data Wrappers** | `DataState`, `InfiniteScroller` |
+
+---
+
+### 🧠 **Features / Pages**
+
+| עמוד | רכיבים עיקריים |
+|-------|----------------|
+| **Auth** | `LoginFormGoogle`, `LoginFormEmail`, `SignupForm`, `RestorePasswordForm` |
+| **Onboarding** | `OnboardingWizard`, `TagPicker` (Autocomplete + Add) |
+| **Home** | `TagsGrid`, `UserTitleGrid` |
+| **Discover** | `AddTagBar`, `TagsGrid`, `UsersList` (מיון + חיפוש) |
+| **Matches** | `UsersList` (מיון לפי Match Score / Online / Name / Last Visit) |
+| **Friends** | `UsersList` של חברים בלבד |
+| **Bookmarks** | `UsersList` עם `RemarkEditor` |
+| **Profile** | `ProfileHeader`, `PhotoGallery`, `TagManagement` |
+| **Settings** | `BlockedList`, `HiddenList` |
+| **Admin Panel** | `AdminTable` עם Pagination |
+| **Chat** | `ConversationList`, `MessageThread`, `MessageComposer` |
+
+---
+
+## 2️⃣ תלויות בין רכיבים
+
+| מקור | יעד | פעולה |
+|-------|------|--------|
+| `AddTagBar` | `TagsGrid` / `UsersList` | הוספת תג גורמת לעדכון רשימת התגיות ורענון ההתאמות |
+| `TagsGrid` | `UsersList` | שינוי סדר או מחיקה → רענון התאמות |
+| `TagManagement` | `Matches` / `Discover` | שינוי תגיות בפרופיל מעדכן חישובי התאמה |
+| `UserCard` | `Bookmarks` / `Settings` / `Chat` | פעולות כמו שמירה, חסימה, הודעה |
+| `ProfileHeader` | `UserCard` | עריכת פרופיל מתעדכנת בתצוגות אחרות |
+| `ConversationList` | `MessageThread` | בחירת שיחה טוענת את ההודעות |
+| `MessageComposer` | `MessageThread` | שליחת הודעה מוסיפה הודעה חיה לשיחה |
+
+**ניהול State מומלץ:**
+- React Query – לנתוני API (fetch, cache, invalidations)
+- Zustand – ל־UI states קלים (מודאלים, פילטרים, מיון)
+- טריגרים גלובליים (כגון `"tag:added"` / `"user:blocked"`) מפעילים invalidate אוטומטי ב־React Query.
+
+---
+
+## 3️⃣ רכיבי UI אטומיים
+
+| רכיב | מאפיינים |
+|-------|-----------|
+| `Button` | Variants: `primary / secondary / ghost / destructive` ; Sizes: `sm / md / lg` |
+| `IconButton` | כפתור לאיקונים בלבד, עם `aria-label` |
+| `TagPill` | `state: existing | addable | removable` ; שינוי צבע לפי מצב |
+| `Badge` | צבעים: `default / brand / success / warn / danger` |
+| `Input`, `Textarea`, `Select`, `Combobox` | רכיבי קלט רגילים |
+| `Switch`, `Checkbox`, `Radio` | שליטה בבחירות |
+| `Tabs`, `SegmentedControl` | למיון או סינון תוכן |
+| `Card` | מעטפת לכרטיסים (UserCard וכו') |
+| `Avatar` | תמונת משתמש |
+| `Progress` | מציג אחוז התאמה |
+| `Pagination` | שליטה בעמודים |
+| `Modal`, `Dialog`, `Sheet` | חלונות קופצים / גלריות |
+| `Toast` | הודעות זמניות |
+
+---
+
+## 4️⃣ מודלים (TypeScript) – מותאם ל־Mongoose
+
+</div>
+<div>
+
+```ts
+export interface Tag {
+  _id: string;
+  slug: string; // normalized, unique (lowercase, no spaces)
+  label: string; // display name
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface User {
+  _id: string;
+  username: string;
+  email: string;
+  avatarUrl?: string;
+  bio?: string;
+  location?: string;
+  tags: string[]; // ref: Tag._id
+  photos: string[]; // URLs
+  isOnline: boolean;
+  lastVisitAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Bookmark {
+  _id: string;
+  userId: string; // owner
+  targetUserId: string; // bookmarked user
+  remark?: string;
+  createdAt: Date;
+}
+
+export interface Friendship {
+  _id: string;
+  userA: string;
+  userB: string;
+  status: "pending" | "accepted" | "blocked";
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MatchScore {
+  _id: string;
+  userId: string;
+  targetUserId: string;
+  score: number; // 0..100
+  sharedTagsCount: number;
+  computedAt: Date;
+}
+
+export interface Conversation {
+  _id: string;
+  members: string[]; // 2 for DM
+  lastMessageAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Message {
+  _id: string;
+  conversationId: string;
+  senderId: string;
+  body: string;
+  sentAt: Date;
+  readBy: string[]; // members who read
+}
+
+export interface Block {
+  _id: string;
+  userId: string; // who blocks
+  targetUserId: string; // who is blocked
+  createdAt: Date;
+}
+
+export interface Hidden {
+  _id: string;
+  userId: string;
+  targetUserId: string;
+  createdAt: Date;
+}
+
+export interface AdminAction {
+  _id: string;
+  adminId: string;
+  action: string; // e.g., 'ban_user', 'delete_photo'
+  targetId?: string;
+  meta?: Record<string, unknown>;
+  createdAt: Date;
+}
+```
+
+</div>
+<div dir="rtl">
+
+## 5️⃣ עיצוב הסכמה של MongoDB
+
+### 🗂️ Collections עיקריות
+
+- **users** – פרופילי משתמשים + תגיות (refs ל־`tags`)
+- **tags** – רשימת תגיות גלובלית
+- **bookmarks** – משתמשים שמורים
+- **friendships** – קשרים וחסימות
+- **match_scores** – ציוני התאמה מחושבים
+- **conversations** / **messages** – מערכת הצ’אט
+- **blocks**, **hiddens** – ניהול הגדרות פרטיות
+- **admin_actions** – פעולות מנהלים
+
+</div>
+<div dir="rtl">
+
+### ⚡ אינדקסים מומלצים
+
+</div>
+
+```text
+users:        { username: 1 }, { tags: 1 }, { isOnline: 1 }, { lastVisitAt: -1 }
+tags:         { slug: 1 }, { label: "text" }
+bookmarks:    { userId: 1, targetUserId: 1 }, { userId: 1, createdAt: -1 }
+match_scores: { userId: 1, score: -1 }, { userId: 1, targetUserId: 1 }
+messages:     { conversationId: 1, sentAt: -1 }
+conversations:{ members: 1, updatedAt: -1 }
+```
+
+<div dir="rtl">
+
+### 📘 דוגמות סכמות Mongoose
+
+</div>
+
+```ts
+// Tag
+import { Schema, model } from "mongoose";
+
+const TagSchema = new Schema(
+  {
+    slug: { type: String, required: true, unique: true, index: true },
+    label: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
+TagSchema.index({ label: "text" });
+
+export const TagModel = model("Tag", TagSchema);
+
+---
+
+// User
+import { Schema, model, Types } from "mongoose";
+
+const UserSchema = new Schema(
+  {
+    username: { type: String, required: true, unique: true, index: true },
+    email: { type: String, required: true, unique: true },
+    avatarUrl: { type: String },
+    bio: { type: String },
+    location: { type: String },
+    tags: [{ type: Types.ObjectId, ref: "Tag", index: true }],
+    photos: [{ type: String }],
+    isOnline: { type: Boolean, default: false, index: true },
+    lastVisitAt: { type: Date, index: true },
+  },
+  { timestamps: true }
+);
+
+export const UserModel = model("User", UserSchema);
+
+---
+
+// Bookmark
+import { Schema, model, Types } from "mongoose";
+
+const BookmarkSchema = new Schema(
+  {
+    userId: { type: Types.ObjectId, ref: "User", required: true, index: true },
+    targetUserId: { type: Types.ObjectId, ref: "User", required: true },
+    remark: { type: String },
+  },
+  { timestamps: { createdAt: true, updatedAt: false } }
+);
+
+BookmarkSchema.index({ userId: 1, targetUserId: 1 }, { unique: true });
+BookmarkSchema.index({ userId: 1, createdAt: -1 });
+
+export const BookmarkModel = model("Bookmark", BookmarkSchema);
+
+---
+
+// Friendship
+import { Schema, model, Types } from "mongoose";
+
+const FriendshipSchema = new Schema(
+  {
+    userA: { type: Types.ObjectId, ref: "User", required: true, index: true },
+    userB: { type: Types.ObjectId, ref: "User", required: true, index: true },
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "blocked"],
+      required: true,
+      index: true,
+    },
+  },
+  { timestamps: true }
+);
+
+FriendshipSchema.index({ userA: 1, userB: 1 }, { unique: true });
+
+export const FriendshipModel = model("Friendship", FriendshipSchema);
+
+---
+
+// MatchScore
+import { Schema, model, Types } from "mongoose";
+
+const MatchScoreSchema = new Schema(
+  {
+    userId: { type: Types.ObjectId, ref: "User", required: true, index: true },
+    targetUserId: { type: Types.ObjectId, ref: "User", required: true },
+    score: { type: Number, required: true, index: true },
+    sharedTagsCount: { type: Number, required: true },
+    computedAt: { type: Date, default: () => new Date(), index: true },
+  },
+  { timestamps: false }
+);
+
+MatchScoreSchema.index({ userId: 1, targetUserId: 1 }, { unique: true });
+MatchScoreSchema.index({ userId: 1, score: -1 });
+
+export const MatchScoreModel = model("MatchScore", MatchScoreSchema);
+
+---
+
+// Conversation
+import { Schema, model, Types } from "mongoose";
+
+const ConversationSchema = new Schema(
+  {
+    members: [{ type: Types.ObjectId, ref: "User", index: true }],
+    lastMessageAt: { type: Date, index: true },
+  },
+  { timestamps: true }
+);
+
+ConversationSchema.index({ members: 1, updatedAt: -1 });
+
+export const ConversationModel = model("Conversation", ConversationSchema);
+
+---
+
+// Message
+import { Schema, model, Types } from "mongoose";
+
+const MessageSchema = new Schema(
+  {
+    conversationId: {
+      type: Types.ObjectId,
+      ref: "Conversation",
+      required: true,
+      index: true,
+    },
+    senderId: {
+      type: Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+    body: { type: String, required: true },
+    sentAt: { type: Date, default: () => new Date(), index: true },
+    readBy: [{ type: Types.ObjectId, ref: "User" }],
+  },
+  { timestamps: false }
+);
+
+MessageSchema.index({ conversationId: 1, sentAt: -1 });
+
+export const MessageModel = model("Message", MessageSchema);
+
+---
+
+// Block
+import { Schema, model, Types } from "mongoose";
+
+const BlockSchema = new Schema(
+  {
+    userId: { type: Types.ObjectId, ref: "User", required: true, index: true },
+    targetUserId: {
+      type: Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+  },
+  { timestamps: { createdAt: true, updatedAt: false } }
+);
+
+BlockSchema.index({ userId: 1, targetUserId: 1 }, { unique: true });
+
+export const BlockModel = model("Block", BlockSchema);
+
+---
+
+// Hidden
+import { Schema, model, Types } from "mongoose";
+
+const HiddenSchema = new Schema(
+  {
+    userId: { type: Types.ObjectId, ref: "User", required: true, index: true },
+    targetUserId: {
+      type: Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+  },
+  { timestamps: { createdAt: true, updatedAt: false } }
+);
+
+HiddenSchema.index({ userId: 1, targetUserId: 1 }, { unique: true });
+
+export const HiddenModel = model("Hidden", HiddenSchema);
+
+---
+
+// AdminAction
+import { Schema, model, Types } from "mongoose";
+
+const AdminActionSchema = new Schema(
+  {
+    adminId: { type: Types.ObjectId, ref: "User", required: true, index: true },
+    action: { type: String, required: true },
+    targetId: { type: Types.ObjectId, ref: "User", required: false },
+    meta: { type: Object, required: false },
+  },
+  { timestamps: true }
+);
+
+AdminActionSchema.index({ adminId: 1, action: 1 });
+
+export const AdminActionModel = model("AdminAction", AdminActionSchema);
+```
+
+<div dir="rtl">
+
+---
+
+## 6️⃣ המלצות נוספות 
+
+### ✅ Autocomplete לתגיות
+
+- השתמש ב־`slug` normalized + text index על `label`.
+- אם מתאפשר, השתמש ב־**Atlas Search (n-gram)** לשיפור ביצועים וחוויית השלמה אוטומטית.
+
+### ✅ Match Score
+
+- הציון מחושב לפי כמות התגיות התואמות בין שני המשתמשים.
+- בצע חישוב מראש בטבלת `match_scores` — **אל תחשב בזמן ריצה**.
+- עדכן את הציונים רק בעת שינוי תגיות אצל המשתמש.
+
+### ✅ Pagination חכמה
+
+- השתמש ב־**cursor-based pagination** עם אינדקסים מתאימים.
+- מאפשר טעינה יעילה וגלילה אינסופית (infinite scroll) במסכים כמו Discover או Matches.
+
+### ✅ ביצועים
+
+- בצע **פרויקציה מצומצמת** בעת שליפת נתונים: רק `username`, `avatarUrl`, `matchScore`.
+- נהל cache ו־prefetching באמצעות **React Query**.
+
+### ✅ תמונות
+
+- אחסן תמונות רק ב־**S3 / Cloudinary**.
+- בשדות בבסיס הנתונים שמור **רק URLs** (`photos[]`).
+
+### ✅ אבטחה ופרטיות
+
+- אימות באמצעות **OAuth (Google)**.
+- נהל הרשאות עם **JWT + Refresh tokens**.
+- סנן משתמשים חסומים או מוסתרים כבר ברמת ה־API.
+
+### ✅ שלד טעינה (Boilerplate Loading Layout)
+- יש להגדיר מבנה בסיסי (skeleton layout) שיוצג למשתמש בזמן טעינת נתונים מהשרת.
+- השלד יכלול גרסה כללית של מבנה הדף (Header, Navbar, Content, Footer) עם אלמנטים מצומצמים.
+- כל אזור בתצוגה (כרטיסי משתמשים, רשימות, גרפים וכו’) יציג placeholders או skeletons בצורתם המשוערת.
+- השלד יופעל אוטומטית באמצעות state גלובלי (React Query / Zustand) המייצג מצב “loading”.
+- יש לוודא שהתצוגה אינה קופצת (layout shift) במעבר בין מצב טעינה לתצוגת הנתונים.
+
+### ✅ RTL + נגישות + Dark Mode
+
+- הגדר `dir="rtl"` ברכיב הראשי וב־Tailwind config.
+- השתמש ב־**shadcn/ui** ו־**Radix UI** עם בדיקות RTL.
+- כל רכיב UI במערכת יתמוך בצבעים דינמיים (variables או design tokens) המוגדרים מראש.
+- יש להוסיף תמיכה מלאה במצב כהה (Dark Mode) בהתאם להעדפת המשתמש או מערכת ההפעלה (`prefers-color-scheme`)
+- ודא תאימות צבעים ו־contrast לפי תקן **WCAG 2.1**.
+- התמיכה תכלול גם אלמנטים דינמיים כגון מודאלים, תפריטים, skeletons, ו־toasts.
+- יש להוסיף הגדרה אחידה לניהול Theme (בהעדפה דרך context / Zustand store) שתאפשר מעבר בזמן אמת בין מצבי אור וכהה.
+
+### ✅ בדיקות ואירועים
+
+- כתוב **Unit + Integration + E2E** לכל זרימת עבודה עיקרית.
+- הוסף לוגים עבור פעולות מרכזיות:
+  - הוספת/הסרת תגית
+  - שמירת משתמש
+  - שליחת הודעה בצ’אט
+
+### ✅ API Endpoints עיקריים
+
+</div>
+
+```text
+/tags/search
+/users/discover
+/matches
+/bookmarks
+/friends
+/chat/*
+/settings/blocked
+/settings/hidden
+
+```
+
+<div dir="rtl">
+
+---
+
+## 🧭 סיכום
+
+**בניית רכיבי UI בסיסיים**  
+כולל רכיבי `Shared` ו־`Atomic` לשימוש חוזר בכל חלקי האפליקציה.
+
+**הגדרת מודלים וסכמה ב־Mongoose**  
+תכנון סכמות, קשרים ואינדקסים תומכי ביצועים עבור MongoDB.
+
+**פיתוח Endpoints עיקריים וחיבורם ל־React Query hooks**  
+בניית API יציב עם hooks לניהול נתונים, cache ו־prefetching ב־Frontend.
+
+**הרכבת הדפים (Discover, Matches, Chat וכו’)**  
+יישום מלא של הזרימות לפי מסמך העיצוב ו־UI interactions שהוגדרו.
+
+---
+
+הסוף של המסמך.
+
+</div>

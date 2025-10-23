@@ -1,7 +1,7 @@
 ---
+description: Project Configuration Rules and Guidelines
 alwaysApply: true
 ---
-
 ### מדיניות קבצי קונפיגורציה
 
 1. קובץ `.env` יכיל אך ורק סודות:
