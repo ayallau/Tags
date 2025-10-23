@@ -2,15 +2,7 @@ import { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { PageSkeleton } from './components/skeletons';
-import { 
-  HomePage, 
-  DiscoverPage, 
-  MatchesPage, 
-  FriendsPage, 
-  ChatPage, 
-  ProfilePage, 
-  SettingsPage 
-} from './routes';
+import { HomePage, DiscoverPage, MatchesPage, FriendsPage, ChatPage, ProfilePage, SettingsPage } from './routes';
 import './App.css';
 
 function App() {
@@ -18,13 +10,13 @@ function App() {
     <Router>
       <Routes>
         <Route path='/' element={<AppLayout />}>
-          <Route 
-            index 
+          <Route
+            index
             element={
               <Suspense fallback={<PageSkeleton />}>
                 <HomePage />
               </Suspense>
-            } 
+            }
           />
           <Route
             path='discover'
