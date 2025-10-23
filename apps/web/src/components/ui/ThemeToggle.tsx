@@ -8,9 +8,9 @@ interface ThemeToggleProps {
 }
 
 const themeOptions: { value: Theme; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { value: 'system', label: 'מערכת', icon: Monitor },
-  { value: 'light', label: 'בהיר', icon: Sun },
-  { value: 'dark', label: 'כהה', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor },
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
 ];
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
@@ -23,13 +23,13 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     setIsOpen(false);
   };
 
-  const currentOption = themeOptions.find(option => option.value === currentTheme) || themeOptions[0];
+  const currentOption = (themeOptions.find(option => option.value === currentTheme) ?? themeOptions[0])!;
   const CurrentIcon = currentOption.icon;
 
   return (
     <div className={cn('relative', className)}>
       <button
-        type="button"
+        type='button'
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           'flex items-center gap-2 px-3 py-2 rounded-md',
@@ -40,11 +40,11 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
           'aria-expanded={isOpen}'
         )}
-        aria-label="בחר ערכת נושא"
-        aria-haspopup="true"
+        aria-label='Select theme'
+        aria-haspopup='true'
       >
-        <CurrentIcon className="w-4 h-4" />
-        <span className="text-sm font-medium">{currentOption.label}</span>
+        <CurrentIcon className='w-4 h-4' />
+        <span className='text-sm font-medium'>{currentOption.label}</span>
       </button>
 
       {isOpen && (
@@ -54,17 +54,17 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
             'bg-surface border border-border rounded-md shadow-lg',
             'z-50'
           )}
-          role="menu"
-          aria-orientation="vertical"
+          role='menu'
+          aria-orientation='vertical'
         >
-          {themeOptions.map((option) => {
+          {themeOptions.map(option => {
             const Icon = option.icon;
             const isSelected = option.value === currentTheme;
-            
+
             return (
               <button
                 key={option.value}
-                type="button"
+                type='button'
                 onClick={() => handleThemeChange(option.value)}
                 className={cn(
                   'w-full flex items-center gap-3 px-3 py-2 text-right',
@@ -75,14 +75,12 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
                   'focus-visible:outline-none focus-visible:bg-surface-hover',
                   isSelected && 'bg-surface-hover'
                 )}
-                role="menuitem"
+                role='menuitem'
                 aria-checked={isSelected}
               >
-                <Icon className="w-4 h-4" />
-                <span className="text-sm font-medium">{option.label}</span>
-                {isSelected && (
-                  <span className="mr-auto text-xs text-foreground-muted">✓</span>
-                )}
+                <Icon className='w-4 h-4' />
+                <span className='text-sm font-medium'>{option.label}</span>
+                {isSelected && <span className='mr-auto text-xs text-foreground-muted'>✓</span>}
               </button>
             );
           })}

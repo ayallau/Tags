@@ -7,7 +7,7 @@ const THEME_STORAGE_KEY = 'theme-preference';
  */
 export function getThemePreference(): Theme {
   if (typeof window === 'undefined') return 'system';
-  
+
   const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme;
   return stored && ['system', 'light', 'dark'].includes(stored) ? stored : 'system';
 }
@@ -17,7 +17,7 @@ export function getThemePreference(): Theme {
  */
 export function setThemePreference(theme: Theme): void {
   if (typeof window === 'undefined') return;
-  
+
   localStorage.setItem(THEME_STORAGE_KEY, theme);
 }
 
@@ -26,11 +26,11 @@ export function setThemePreference(theme: Theme): void {
  */
 export function getEffectiveTheme(): 'light' | 'dark' {
   const preference = getThemePreference();
-  
+
   if (preference === 'system') {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
-  
+
   return preference;
 }
 
@@ -39,7 +39,7 @@ export function getEffectiveTheme(): 'light' | 'dark' {
  */
 export function applyTheme(theme: Theme): void {
   const effectiveTheme = theme === 'system' ? getEffectiveTheme() : theme;
-  
+
   if (effectiveTheme === 'dark') {
     document.documentElement.classList.add('dark');
   } else {
@@ -54,7 +54,7 @@ export function applyTheme(theme: Theme): void {
 export function initializeTheme(): void {
   const preference = getThemePreference();
   applyTheme(preference);
-  
+
   // Listen for system theme changes when preference is 'system'
   if (preference === 'system') {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -63,11 +63,8 @@ export function initializeTheme(): void {
         applyTheme('system');
       }
     };
-    
+
     mediaQuery.addEventListener('change', handleChange);
-    
-    // Cleanup function (though in practice this runs once)
-    return () => mediaQuery.removeEventListener('change', handleChange);
   }
 }
 

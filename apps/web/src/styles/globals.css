@@ -5,24 +5,24 @@
   /* Background colors */
   --background: 0 0% 100%;
   --background-alt: 0 0% 98%;
-  
+
   /* Surface colors */
   --surface: 0 0% 100%;
   --surface-hover: 0 0% 96%;
   --surface-active: 0 0% 94%;
-  
+
   /* Primary colors */
   --primary: 221.2 83.2% 53.3%;
   --primary-foreground: 210 40% 98%;
   --primary-hover: 221.2 83.2% 48%;
   --primary-active: 221.2 83.2% 43%;
-  
+
   /* Secondary colors */
   --secondary: 210 40% 96%;
   --secondary-foreground: 222.2 84% 4.9%;
   --secondary-hover: 210 40% 92%;
   --secondary-active: 210 40% 88%;
-  
+
   /* Semantic colors */
   --info: 199.4 89.4% 48.4%;
   --info-foreground: 0 0% 100%;
@@ -32,16 +32,16 @@
   --warning-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 100%;
-  
+
   /* Text colors */
   --foreground: 222.2 84% 4.9%;
   --foreground-muted: 215.4 16.3% 46.9%;
   --foreground-subtle: 215.3 19.3% 34.5%;
-  
+
   /* Border colors */
   --border: 214.3 31.8% 91.4%;
   --border-hover: 214.3 31.8% 87%;
-  
+
   /* Focus colors */
   --focus: 221.2 83.2% 53.3%;
   --focus-ring: 221.2 83.2% 53.3% / 0.2;
@@ -52,24 +52,24 @@
   /* Background colors */
   --background: 222.2 84% 4.9%;
   --background-alt: 222.2 84% 6%;
-  
+
   /* Surface colors */
   --surface: 222.2 84% 4.9%;
   --surface-hover: 215.3 19.3% 8%;
   --surface-active: 215.3 19.3% 12%;
-  
+
   /* Primary colors */
   --primary: 217.2 91.2% 59.8%;
   --primary-foreground: 222.2 84% 4.9%;
   --primary-hover: 217.2 91.2% 65%;
   --primary-active: 217.2 91.2% 70%;
-  
+
   /* Secondary colors */
   --secondary: 215.3 19.3% 8%;
   --secondary-foreground: 210 40% 98%;
   --secondary-hover: 215.3 19.3% 12%;
   --secondary-active: 215.3 19.3% 16%;
-  
+
   /* Semantic colors */
   --info: 199.4 89.4% 58.4%;
   --info-foreground: 222.2 84% 4.9%;
@@ -79,16 +79,16 @@
   --warning-foreground: 222.2 84% 4.9%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 210 40% 98%;
-  
+
   /* Text colors */
   --foreground: 210 40% 98%;
   --foreground-muted: 215 20.2% 65.1%;
   --foreground-subtle: 215.3 19.3% 34.5%;
-  
+
   /* Border colors */
   --border: 215.3 19.3% 16%;
   --border-hover: 215.3 19.3% 20%;
-  
+
   /* Focus colors */
   --focus: 217.2 91.2% 59.8%;
   --focus-ring: 217.2 91.2% 59.8% / 0.2;
@@ -100,14 +100,16 @@
 }
 
 html {
-  direction: rtl;
+  direction: ltr;
   scroll-behavior: smooth;
 }
 
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-feature-settings:
+    'rlig' 1,
+    'calt' 1;
 }
 
 /* Focus styles */
@@ -120,7 +122,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
- *::after {
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -129,11 +131,11 @@ body {
 }
 
 /* RTL-specific adjustments */
-[dir="rtl"] {
+[dir='rtl'] {
   text-align: right;
 }
 
-[dir="rtl"] .rtl\:text-left {
+[dir='rtl'] .rtl\:text-left {
   text-align: left;
 }
 
@@ -153,7 +155,7 @@ select:focus-visible {
     --border: 0 0% 0%;
     --border-hover: 0 0% 0%;
   }
-  
+
   .dark {
     --border: 0 0% 100%;
     --border-hover: 0 0% 100%;
