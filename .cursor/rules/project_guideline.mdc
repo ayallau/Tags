@@ -4,6 +4,7 @@ alwaysApply: true
 ---
 
 ## Design Reference
+- **Images are under**: .cursor\DesignReference\*
 - Attach: <Include appropriate image from .cursor\DesignReference>
 - Use the image strictly as visual inspiration (layout/spacing/feel), do NOT copy pixel-perfect.
 
@@ -18,9 +19,10 @@ alwaysApply: true
 - **shadcn/ui**: Use existing components; extend only when required.
 
 ## Repository Rules — MUST FOLLOW
+- **Load and follow**: .cursor\rules\project_guideline.mdc
 - **Environment Files**: No creation/update of .env files. If example needed — create .env.example only.
 - **Module System**: Maintain ESM + TS "NodeNext". Do not change base tsconfig without approval.
-- **Checkpoints**: Before major changes: perform commit checkpoint.
+- **Checkpoints**: Before major changes: perform commit checkpoint. Show diff before writing.
 
 ## Task Guidelines
 - Describe briefly what you are about to change.
