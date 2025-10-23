@@ -1,7 +1,7 @@
 // src/dtos/auth.dto.ts
 
 // ========================================
-// Request DTOs (מה שנכנס מה-client)
+// Request DTOs (what comes from client)
 // ========================================
 
 export interface LoginDto {
@@ -24,7 +24,7 @@ export interface ResetPasswordDto {
 }
 
 // ========================================
-// Response DTOs (מה שיוצא ל-client)
+// Response DTOs (what goes to client)
 // ========================================
 
 export interface AuthResponseDto {
@@ -42,4 +42,3 @@ export interface MessageResponseDto {
 export interface ErrorResponseDto {
   error: string;
 }
-

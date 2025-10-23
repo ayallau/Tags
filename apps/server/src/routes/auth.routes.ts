@@ -1,4 +1,9 @@
-import { Router, type Request, type Response, type NextFunction } from "express";
+import {
+  Router,
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
 import passport from "passport";
 import {
   loginWithEmail,
@@ -35,12 +40,12 @@ router.post(
     // Basic rate limiting check (simple in-memory store for demo)
     const clientIP = req.ip || req.socket.remoteAddress;
     console.log(
-      `[${new Date().toISOString()}] Password reset request from IP: ${clientIP} for email: ${email}`,
+      `[${new Date().toISOString()}] Password reset request from IP: ${clientIP} for email: ${email}`
     );
 
     next();
   },
-  forgotPassword,
+  forgotPassword
 );
 
 // Reset password with token
@@ -67,12 +72,12 @@ router.post(
 
     const clientIP = req.ip || req.socket.remoteAddress;
     console.log(
-      `[${new Date().toISOString()}] Password reset attempt from IP: ${clientIP} with token: ${token.substring(0, 8)}...`,
+      `[${new Date().toISOString()}] Password reset attempt from IP: ${clientIP} with token: ${token.substring(0, 8)}...`
     );
 
     next();
   },
-  resetPassword,
+  resetPassword
 );
 
 // Google OAuth
@@ -80,12 +85,12 @@ router.get(
   "/google",
   (req: Request, _res: Response, next: NextFunction) => {
     console.log(
-      `[${new Date().toISOString()}] Requesting Google OAuth - IP: ${req.ip}`,
+      `[${new Date().toISOString()}] Requesting Google OAuth - IP: ${req.ip}`
     );
     next();
   },
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  passport.authenticate("google", { scope: ["profile", "email"] }),
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 router.get(
@@ -103,7 +108,7 @@ router.get(
       }
       const result = loginWithProvider(req.user, "google");
 
-      // TODO: בעתיד - הוסף שליחת refresh token בעוגייה:
+      // TODO: In the future - add refresh token sending in cookies:
       // if (result.refreshToken) {
       //   res.cookie('refreshToken', result.refreshToken, {
       //     httpOnly: true,
@@ -117,18 +122,18 @@ router.get(
     } catch (err) {
       next(err);
     }
-  },
+  }
 );
 
 // Logout Routes
-// TODO: בעתיד - הוסף middleware לבדיקת refresh token בעוגיות
+// TODO: In the future - add middleware for refresh token cookie validation
 
 // Simple logout - client-side token removal + cookie clearing
-// TODO: לשנות ל-middleware שמוחק גם refresh token מעוגיות
+// TODO: Change to middleware that also removes refresh token from cookies
 router.post("/logout", logout);
 
 // Global logout - invalidate all user tokens + clear cookies
-// TODO: לשנות ל-middleware שמטפל גם ב-refresh tokens בעוגיות
+// TODO: Change to middleware that also handles refresh tokens in cookies
 router.post("/logout/global", globalLogout);
 
 export default router;

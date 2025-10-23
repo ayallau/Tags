@@ -15,13 +15,13 @@ import {
   sendPasswordResetEmail,
   sendPasswordResetConfirmationEmail,
 } from "../services/emailService.js";
-import type { 
-  LoginDto, 
-  RegisterDto, 
-  ForgotPasswordDto, 
+import type {
+  LoginDto,
+  RegisterDto,
+  ForgotPasswordDto,
   ResetPasswordDto,
   AuthResponseDto,
-  MessageResponseDto
+  MessageResponseDto,
 } from "../dtos/index.js";
 import type { IUser } from "../models/User.js";
 import type { Types } from "mongoose";
@@ -30,7 +30,8 @@ export async function loginWithEmail(
   req: Request<Record<string, never>, AuthResponseDto, LoginDto>,
   res: Response<AuthResponseDto | { error: string }>,
   next: NextFunction
-): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     const { email, password } = req.body;
     const user = await findByEmailLower(email);
@@ -40,7 +41,7 @@ export async function loginWithEmail(
     }
     const accessToken = createAccessToken(user, "email");
 
-    // TODO: בעתיד - הוסף יצירת refresh token ושליחתו בעוגייה:
+    // TODO: In the future - add refresh token creation and sending in cookies:
     // const refreshToken = createRefreshToken(user);
     // res.cookie('refreshToken', refreshToken, {
     //   httpOnly: true,
@@ -59,7 +60,8 @@ export async function registerWithEmail(
   req: Request<Record<string, never>, AuthResponseDto, RegisterDto>,
   res: Response<AuthResponseDto | { error: string }>,
   next: NextFunction
-): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     const { email, password } = req.body;
     if (await findByEmailLower(email)) {
@@ -69,7 +71,7 @@ export async function registerWithEmail(
     const newUser = await createUser({ email, passwordHash });
     const accessToken = createAccessToken(newUser, "email");
 
-    // TODO: בעתיד - הוסף יצירת refresh token ושליחתו בעוגייה:
+    // TODO: In the future - add refresh token creation and sending in cookies:
     // const refreshToken = createRefreshToken(newUser);
     // res.cookie('refreshToken', refreshToken, {
     //   httpOnly: true,
@@ -84,39 +86,43 @@ export async function registerWithEmail(
   }
 }
 
-export function loginWithProvider(user: IUser, provider: string): AuthResponseDto {
+export function loginWithProvider(
+  user: IUser,
+  provider: string
+): AuthResponseDto {
   const accessToken = createAccessToken(user, provider);
 
-  // TODO: בעתיד - הוסף יצירת refresh token:
+  // TODO: In the future - add refresh token:
   // const refreshToken = createRefreshToken(user);
-  // return { accessToken, refreshToken }; // יוחזר לcallback שישלח אותו בעוגייה
+  // return { accessToken, refreshToken }; // Will be returned to callback to send in cookies
 
   return { accessToken };
 }
 
 /**
- * מטפל בבקשת איפוס סיסמה - יוצר טוכן ושולח אימייל
+ * Handles password reset request - creates token and sends email
  */
 export async function forgotPassword(
   req: Request<Record<string, never>, MessageResponseDto, ForgotPasswordDto>,
   res: Response<MessageResponseDto | { error: string }>,
   next: NextFunction
-): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     const { email } = req.body;
 
-    // בדיקת תקינות input
+    // Input validation
     if (!email || typeof email !== "string") {
       return res.status(400).json({ error: "Email is required" });
     }
 
-    // חיפוש המשתמש
+    // Search for user
     const user = await findByEmailLower(email);
     if (!user) {
-      // מטעמי אבטחה - לא חושפים שהמשתמש לא קיים
-      // מחזירים הודעת הצלחה גם אם המשתמש לא נמצא
+      // For security reasons - don't reveal that user doesn't exist
+      // Return success message even if user is not found
       console.log(
-        `[${new Date().toISOString()}] Password reset requested for non-existent email: ${email}`,
+        `[${new Date().toISOString()}] Password reset requested for non-existent email: ${email}`
       );
       return res.json({
         message:
@@ -124,26 +130,26 @@ export async function forgotPassword(
       });
     }
 
-    // יצירת טוכן איפוס סיסמה
+    // Create password reset token
     const { token } = await createResetToken(user._id as Types.ObjectId, 1); // תוקף של שעה
 
     // שליחת אימייל עם הטוקן
     const emailResult = await sendPasswordResetEmail(
       user.emailLower!,
       token,
-      null, // User model doesn't have name field
+      null // User model doesn't have name field
     );
 
     if (!emailResult.success) {
       console.error(
         `[${new Date().toISOString()}] Failed to send reset email to ${email}:`,
-        emailResult.error,
+        emailResult.error
       );
       return res.status(500).json({ error: "Failed to send reset email" });
     }
 
     console.log(
-      `[${new Date().toISOString()}] Password reset email sent successfully to ${email}`,
+      `[${new Date().toISOString()}] Password reset email sent successfully to ${email}`
     );
 
     res.json({
@@ -155,7 +161,7 @@ export async function forgotPassword(
   } catch (err) {
     console.error(
       `[${new Date().toISOString()}] Error in forgotPassword:`,
-      err,
+      err
     );
     next(err);
   }
@@ -168,11 +174,12 @@ export async function resetPassword(
   req: Request<Record<string, never>, MessageResponseDto, ResetPasswordDto>,
   res: Response<MessageResponseDto | { error: string }>,
   next: NextFunction
-): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     const { token, newPassword } = req.body;
 
-    // בדיקת תקינות input
+    // Input validation
     if (!token || typeof token !== "string") {
       return res.status(400).json({ error: "Reset token is required" });
     }
@@ -221,11 +228,11 @@ export async function resetPassword(
     // שליחת אימייל אישור
     await sendPasswordResetConfirmationEmail(
       user.emailLower!,
-      null, // User model doesn't have name field
+      null // User model doesn't have name field
     );
 
     console.log(
-      `[${new Date().toISOString()}] Password reset successfully for user ${String(user._id)}`,
+      `[${new Date().toISOString()}] Password reset successfully for user ${String(user._id)}`
     );
 
     res.json({
@@ -240,8 +247,8 @@ export async function resetPassword(
 }
 
 /**
- * Simple logout - הנחיה לצד הלקוח למחוק את הטוקן
- * TODO: בעתיד - הוסף מחיקת refresh token מעוגיות
+ * Simple logout - instructs client to delete token
+ * TODO: In the future - add refresh token deletion from cookies
  */
 export function logout(
   req: Request,
@@ -250,7 +257,7 @@ export function logout(
 ): void {
   try {
     console.log(
-      `[${new Date().toISOString()}] User logged out - IP: ${req.ip || "unknown"}`,
+      `[${new Date().toISOString()}] User logged out - IP: ${req.ip || "unknown"}`
     );
 
     // TODO: כאשר יוגדרו refresh tokens בעוגיות, הוסף:
@@ -271,16 +278,17 @@ export function logout(
 }
 
 /**
- * Global logout - מבטל את כל הטוקנים של המשתמש
- * TODO: בעתיד - הוסף מחיקת refresh token מעוגיות וביטול כל refresh tokens במסד הנתונים
+ * Global logout - invalidates all user tokens
+ * TODO: In the future - add refresh token deletion from cookies and invalidate all refresh tokens in database
  */
 export async function globalLogout(
   req: Request,
   res: Response<MessageResponseDto | { error: string }>,
   next: NextFunction
-): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
-    // קבלת פרטי המשתמש מהטוקן
+    // Get user details from token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ error: "No valid token provided" });
@@ -289,13 +297,13 @@ export async function globalLogout(
     const token = authHeader.substring(7);
     const decoded = verifyAccessToken(token);
 
-    // חיפוש המשתמש במסד הנתונים
+    // Search for user במסד הנתונים
     const user = await User.findById(decoded.sub);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // הגדלת tokenVersion לביטול כל הטוקנים הקיימים
+    // Increment tokenVersion to invalidate all existing tokens
     await user.updateOne({
       $inc: { tokenVersion: 1 },
     });
@@ -312,7 +320,7 @@ export async function globalLogout(
     // await RefreshToken.deleteMany({ userId: user._id });
 
     console.log(
-      `[${new Date().toISOString()}] Global logout for user ${String(user._id)} - tokenVersion incremented`,
+      `[${new Date().toISOString()}] Global logout for user ${String(user._id)} - tokenVersion incremented`
     );
 
     res.json({
@@ -320,7 +328,10 @@ export async function globalLogout(
       action: "clearToken",
     });
   } catch (err) {
-    if (err instanceof Error && (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError")) {
+    if (
+      err instanceof Error &&
+      (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError")
+    ) {
       return res.status(401).json({ error: "Invalid token" });
     }
     console.error(`[${new Date().toISOString()}] Error in globalLogout:`, err);

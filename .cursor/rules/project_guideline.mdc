@@ -4,8 +4,8 @@ alwaysApply: true
 ---
 
 ## Design Reference
-- **Images are under**: .cursor\DesignReference\*
-- Attach: <Include appropriate image from .cursor\DesignReference>
+- **Images are under**: apps/web/public/DesignReference/*
+- Attach: <Include appropriate image from apps/web/public/DesignReference>
 - Use the image strictly as visual inspiration (layout/spacing/feel), do NOT copy pixel-perfect.
 
 ## Design Guardrails — MUST FOLLOW
@@ -22,16 +22,17 @@ alwaysApply: true
 - **Load and follow**: .cursor\rules\project_guideline.mdc
 - **Environment Files**: No creation/update of .env files. If example needed — create .env.example only.
 - **Module System**: Maintain ESM + TS "NodeNext". Do not change base tsconfig without approval.
-- **Checkpoints**: Before major changes: perform commit checkpoint. Show diff before writing.
+- **Checkpoints**: Before major changes: perform commit checkpoint.
+- **Code Language**: All code, comments, strings, and UI text must be in English only, unless otherwise specified or required by the user.
 
 ## Task Guidelines
 - Describe briefly what you are about to change.
 - Execute only the current step. Do not jump to the next stage.
 - Provide Acceptance Criteria + brief manual tests.
+- build the code in the browser and test it.
 
 ## Deliverables
 - List of files to be created/modified.
-- Complete code (LTR, left-aligned).
 - Manual tests and execution instructions.
 
 ## Approval Process

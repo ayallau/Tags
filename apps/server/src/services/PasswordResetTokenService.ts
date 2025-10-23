@@ -3,7 +3,7 @@ import type { Types } from "mongoose";
 import PasswordResetToken from "../models/PasswordResetToken.js";
 
 export async function createResetToken(userId: Types.ObjectId, hoursValid = 1) {
-  // מחיקת טוקנים ישנים של המשתמש
+  // Delete old tokens for the user
   await PasswordResetToken.deleteMany({ userId });
 
   const token = crypto.randomBytes(32).toString("hex");

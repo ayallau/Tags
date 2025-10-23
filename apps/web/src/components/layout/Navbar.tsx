@@ -12,29 +12,27 @@ export function Navbar() {
   const location = useLocation();
 
   return (
-    <nav className="border-b bg-background">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-end gap-1">
-          {navigationItems.map((item) => {
+    <nav className='border-b bg-background'>
+      <div className='container mx-auto px-4'>
+        <div className='flex items-center justify-center gap-1'>
+          {navigationItems.map(item => {
             const isActive = location.pathname === item.href;
-            
+
             return (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors hover:text-primary",
-                  "border-b-2 border-transparent hover:border-muted-foreground/20",
-                  isActive 
-                    ? "text-primary border-primary" 
-                    : "text-muted-foreground"
+                  'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors hover:text-primary',
+                  'border-b-2 border-transparent hover:border-muted-foreground/20',
+                  isActive ? 'text-primary border-primary' : 'text-muted-foreground'
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <span className="text-base" aria-hidden="true">
+                <span className='text-base' aria-hidden='true'>
                   {item.icon}
                 </span>
-                <span className="hidden sm:inline">{item.name}</span>
+                <span className='hidden sm:inline'>{item.name}</span>
               </Link>
             );
           })}

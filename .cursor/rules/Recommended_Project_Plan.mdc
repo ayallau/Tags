@@ -84,8 +84,6 @@ alwaysApply: true
 
 ## 4️⃣ מודלים (TypeScript) – מותאם ל־Mongoose
 
-</div>
-<div>
 
 ```ts
 export interface Tag {
@@ -178,9 +176,6 @@ export interface AdminAction {
 }
 ```
 
-</div>
-<div dir="rtl">
-
 ## 5️⃣ עיצוב הסכמה של MongoDB
 
 ### 🗂️ Collections עיקריות
@@ -194,12 +189,8 @@ export interface AdminAction {
 - **blocks**, **hiddens** – ניהול הגדרות פרטיות
 - **admin_actions** – פעולות מנהלים
 
-</div>
-<div dir="rtl">
 
 ### ⚡ אינדקסים מומלצים
-
-</div>
 
 ```text
 users:        { username: 1 }, { tags: 1 }, { isOnline: 1 }, { lastVisitAt: -1 }
@@ -210,11 +201,7 @@ messages:     { conversationId: 1, sentAt: -1 }
 conversations:{ members: 1, updatedAt: -1 }
 ```
 
-<div dir="rtl">
-
 ### 📘 דוגמות סכמות Mongoose
-
-</div>
 
 ```ts
 // Tag
@@ -428,8 +415,6 @@ AdminActionSchema.index({ adminId: 1, action: 1 });
 export const AdminActionModel = model("AdminAction", AdminActionSchema);
 ```
 
-<div dir="rtl">
-
 ---
 
 ## 6️⃣ המלצות נוספות 
@@ -476,7 +461,7 @@ export const AdminActionModel = model("AdminAction", AdminActionSchema);
 ### ✅ RTL + נגישות + Dark Mode
 
 - הגדר `dir="rtl"` ברכיב הראשי וב־Tailwind config.
-- השתמש ב־**shadcn/ui** ו־**Radix UI** עם בדיקות RTL.
+- השתמש ב־**shadcn/ui** ו־**Radix UI**.
 - כל רכיב UI במערכת יתמוך בצבעים דינמיים (variables או design tokens) המוגדרים מראש.
 - יש להוסיף תמיכה מלאה במצב כהה (Dark Mode) בהתאם להעדפת המשתמש או מערכת ההפעלה (`prefers-color-scheme`)
 - ודא תאימות צבעים ו־contrast לפי תקן **WCAG 2.1**.
@@ -493,8 +478,6 @@ export const AdminActionModel = model("AdminAction", AdminActionSchema);
 
 ### ✅ API Endpoints עיקריים
 
-</div>
-
 ```text
 /tags/search
 /users/discover
@@ -506,8 +489,6 @@ export const AdminActionModel = model("AdminAction", AdminActionSchema);
 /settings/hidden
 
 ```
-
-<div dir="rtl">
 
 ---
 
@@ -528,5 +509,3 @@ export const AdminActionModel = model("AdminAction", AdminActionSchema);
 ---
 
 הסוף של המסמך.
-
-</div>

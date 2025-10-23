@@ -10,7 +10,7 @@ export interface UserDto {
   email: string;
   roles: string[];
   createdAt: Date;
-  // לא חושפים: passwordHash, tokenVersion, passwordVersion
+  // Not exposed: passwordHash, tokenVersion, passwordVersion
 }
 
 // ========================================
@@ -18,7 +18,7 @@ export interface UserDto {
 // ========================================
 
 /**
- * המרה מ-IUser (Mongoose Model) ל-UserDto (API Response)
+ * Convert from IUser (Mongoose Model) to UserDto (API Response)
  */
 export function toUserDto(user: IUser): UserDto {
   return {
@@ -40,11 +40,10 @@ export interface CreateUserDto {
 
 export interface UpdateUserDto {
   email?: string;
-  // שדות נוספים שניתן לעדכן
+  // Additional fields that can be updated
 }
 
 export interface GoogleUserDto {
   googleId: string;
   email: string | null;
 }
-

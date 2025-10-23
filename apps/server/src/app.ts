@@ -40,14 +40,14 @@ const rootHandler: RequestHandler = (_req, res): void => {
     "Welcome to the server!<br>" +
       'OpenAPI: <a href="/openapi.yaml" target="_blank">openapi.yaml</a> | ' +
       'Swagger UI: <a href="/docs" target="_blank">docs</a>' +
-      '<br>For authentication, use the <a href="/auth/google" target="_blank">/auth/google</a> endpoint.',
+      '<br>For authentication, use the <a href="/auth/google" target="_blank">/auth/google</a> endpoint.'
   );
 };
 app.get("/", rootHandler);
 
 app.use("/auth", authRoutes);
 
-// דוגמה לנתיב מוגן
+// Example protected route
 import { requireAuth } from "./middleware/requireAuth.js";
 
 const meHandler: RequestHandler = (req, res): void => {
@@ -78,7 +78,7 @@ if (isDev) {
   app.use(
     "/docs",
     swaggerUi.serve,
-    swaggerUi.setup(undefined, { swaggerUrl: "/openapi.yaml", explorer: true }),
+    swaggerUi.setup(undefined, { swaggerUrl: "/openapi.yaml", explorer: true })
   );
 }
 
@@ -91,9 +91,11 @@ if (config.SSL_ENABLED) {
       key: fs.readFileSync(config.SSL_KEY_PATH),
       cert: fs.readFileSync(config.SSL_CERT_PATH),
     };
-    
+
     server = https.createServer(options, app).listen(config.PORT, (): void => {
-      console.log(`🚀 Server is running on HTTPS: https://localhost:${config.PORT}`);
+      console.log(
+        `🚀 Server is running on HTTPS: https://localhost:${config.PORT}`
+      );
       console.log(`📱 Client URL: ${config.CLIENT_URL}`);
       if (isDev) {
         console.log("📚 OpenAPI: /openapi.yaml | Swagger UI: /docs");
@@ -107,7 +109,9 @@ if (config.SSL_ENABLED) {
   }
 } else {
   server = app.listen(config.PORT, (): void => {
-    console.log(`🚀 Server is running on HTTP: http://localhost:${config.PORT}`);
+    console.log(
+      `🚀 Server is running on HTTP: http://localhost:${config.PORT}`
+    );
     console.log(`📱 Client URL: ${config.CLIENT_URL}`);
     if (isDev) {
       console.log("📚 OpenAPI: /openapi.yaml | Swagger UI: /docs");

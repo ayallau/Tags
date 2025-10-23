@@ -2,7 +2,11 @@ import type { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../services/tokenService.js";
 import User from "../models/User.js";
 
-export async function requireAuth(req: Request, res: Response, next: NextFunction) {
+export async function requireAuth(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const header = req.headers.authorization || "";
     const token = header.startsWith("Bearer ") ? header.slice(7) : null;
@@ -12,12 +16,14 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     const user = await User.findById(payload.sub);
     if (!user) return res.status(401).json({ error: "User not found" });
 
-    // בדיקת פסילת טוקן לפי passwordVersion
+    // Check token revocation by passwordVersion
     if ((user.passwordVersion ?? 0) !== (payload.pv ?? -1)) {
-      return res.status(401).json({ error: "Token revoked due to password change" });
+      return res
+        .status(401)
+        .json({ error: "Token revoked due to password change" });
     }
 
-    // בדיקת פסילת טוקן לפי tokenVersion (logout)
+    // Check token revocation by tokenVersion (logout)
     if ((user.tokenVersion ?? 0) !== (payload.tv ?? -1)) {
       return res.status(401).json({ error: "Token revoked due to logout" });
     }

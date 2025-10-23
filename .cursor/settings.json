@@ -2,7 +2,7 @@
   "rules": {
     "alwaysApply": [
       "project_rules",
-      "project_guideline", 
+      "project_guideline",
       "Recommended_Project_Plan",
       "custom_prompts"
     ],

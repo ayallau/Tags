@@ -7,12 +7,12 @@ interface EmailResult {
   error?: string;
 }
 
-// יצירת transporter (בפיתוח - שימוש ב-Ethereal Email Test Account)
+// Create transporter (in development - using Ethereal Email Test Account)
 const createTransporter = async (): Promise<Transporter> => {
   if (process.env.NODE_ENV === "development") {
     // בפיתוח - יצירת test account דינמי ב-Ethereal Email
     const testAccount = await nodemailer.createTestAccount();
-    
+
     return nodemailer.createTransport({
       host: testAccount.smtp.host,
       port: testAccount.smtp.port,
@@ -43,16 +43,16 @@ export async function sendPasswordResetEmail(
 ): Promise<EmailResult> {
   try {
     const transporter = await createTransporter();
-    
+
     const resetUrl = `${config.CLIENT_URL}/reset-password?token=${token}`;
-    
+
     const mailOptions: SendMailOptions = {
       from: '"Your App" <noreply@yourapp.com>',
       to: email,
       subject: "Password Reset Request",
       html: `
         <h2>Password Reset Request</h2>
-        <p>Hello ${name || 'User'},</p>
+        <p>Hello ${name || "User"},</p>
         <p>You have requested to reset your password. Click the link below to reset it:</p>
         <p><a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
         <p>This link will expire in 1 hour.</p>
@@ -64,7 +64,7 @@ export async function sendPasswordResetEmail(
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const info = await transporter.sendMail(mailOptions);
-    
+
     if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const previewUrl = nodemailer.getTestMessageUrl(info);
@@ -72,7 +72,7 @@ export async function sendPasswordResetEmail(
         console.log("Preview URL: %s", previewUrl);
       }
     }
-    
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return { success: true, messageId: String(info.messageId || "") };
   } catch (error) {
@@ -88,14 +88,14 @@ export async function sendPasswordResetConfirmationEmail(
 ): Promise<EmailResult> {
   try {
     const transporter = await createTransporter();
-    
+
     const mailOptions: SendMailOptions = {
       from: '"Your App" <noreply@yourapp.com>',
       to: email,
       subject: "Password Reset Successful",
       html: `
         <h2>Password Reset Successful</h2>
-        <p>Hello ${name || 'User'},</p>
+        <p>Hello ${name || "User"},</p>
         <p>Your password has been successfully reset.</p>
         <p>If you didn't make this change, please contact support immediately.</p>
         <hr>
@@ -105,7 +105,7 @@ export async function sendPasswordResetConfirmationEmail(
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const info = await transporter.sendMail(mailOptions);
-    
+
     if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const previewUrl = nodemailer.getTestMessageUrl(info);
@@ -113,7 +113,7 @@ export async function sendPasswordResetConfirmationEmail(
         console.log("Preview URL: %s", previewUrl);
       }
     }
-    
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return { success: true, messageId: String(info.messageId || "") };
   } catch (error) {

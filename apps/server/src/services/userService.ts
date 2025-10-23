@@ -13,20 +13,23 @@ export async function createUser(userData: CreateUserDto): Promise<IUser> {
   return await user.save();
 }
 
-export async function upsertGoogleUser({ googleId, email }: GoogleUserDto): Promise<IUser> {
-  // חיפוש משתמש קיים לפי Google ID
+export async function upsertGoogleUser({
+  googleId,
+  email,
+}: GoogleUserDto): Promise<IUser> {
+  // Search for existing user by Google ID
   let user = await User.findOne({ "providers.google.id": googleId });
-  
+
   if (user) {
     return user;
   }
 
-  // אם לא נמצא לפי Google ID, חפש לפי אימייל
+  // If not found by Google ID, search by email
   if (email) {
     user = await User.findOne({ emailLower: email.toLowerCase() });
-    
+
     if (user) {
-      // עדכן את המשתמש הקיים עם פרטי Google
+      // Update existing user with Google details
       if (!user.providers) {
         user.providers = {};
       }
@@ -36,7 +39,7 @@ export async function upsertGoogleUser({ googleId, email }: GoogleUserDto): Prom
     }
   }
 
-  // יצירת משתמש חדש
+  // Create new user
   const newUser = new User({
     emailLower: email?.toLowerCase() || null,
     providers: {
