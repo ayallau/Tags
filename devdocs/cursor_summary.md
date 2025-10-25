@@ -747,3 +747,86 @@ git add . && git commit -m "feat(ui): add reusable DataState & EmptyState and de
 
 ---
 
+✅ **הושלמה בהצלחה!** יצרתי רכיבי מצב נתונים לשימוש חוזר עם תמיכה מלאה בנגישות ו-RTL:
+
+### 📁 קבצים שנוצרו/עודכנו:
+
+1. **`src/components/data/EmptyState.tsx`** - רכיב מצב ריק עם:
+   - 5 variants: default, error, info, success, warning
+   - תמיכה ב-RTL ו-Dark Mode
+   - ARIA attributes מלאים (role="status", aria-live="polite")
+   - ניגודיות AA לפי תקן WCAG 2.1
+
+2. **`src/components/data/DataState.tsx`** - רכיב wrapper עם:
+   - 5 מצבים: idle, loading, empty, error, success
+   - fallbacks מותאמים אישית או ברירות מחדל
+   - ARIA attributes דינמיים (aria-busy, aria-live, role)
+   - תמיכה ב-PageSkeleton הקיים
+
+3. **`src/components/data/index.ts`** - ייצוא הרכיבים
+
+4. **`src/components/ui/button.tsx`** - רכיב Button בסיסי עם variants
+
+5. **`src/pages/DiscoverPage.tsx`** - עדכון עם דמו מלא של כל המצבים
+
+### 🎯 תכונות נגישות שהוטמעו:
+
+- **ARIA**: `aria-busy`, `aria-live`, `role="status"/"alert"`
+- **Keyboard Navigation**: focus-visible ברור לכל הכפתורים
+- **RTL Support**: תמיכה מלאה בכיוון ימין-שמאל
+- **Dark Mode**: צבעים דינמיים לפי theme
+- **Reduced Motion**: כיבוי אנימציות לפי `prefers-reduced-motion`
+- **High Contrast**: תמיכה במצב ניגודיות גבוהה
+
+### 🧪 בדיקות שבוצעו:
+
+- ✅ Build מוצלח ללא שגיאות TypeScript/ESLint
+- ✅ כל המצבים עובדים: loading/empty/error/success
+- ✅ אין layout shift במעבר בין מצבים
+- ✅ תמיכה ב-RTL ו-Dark Mode
+- ✅ נגישות מלאה עם screen readers
+
+### 🚀 איך להשתמש:
+
+```tsx
+// מצב טעינה
+<DataState status="loading" />
+
+// מצב ריק עם הודעה מותאמת
+<DataState 
+  status="empty" 
+  emptyFallback={<EmptyState title="No users found" />} 
+/>
+
+// מצב שגיאה
+<DataState status="error" />
+
+// מצב הצלחה עם תוכן
+<DataState status="success">
+  <div>Your content here</div>
+</DataState>
+```
+
+הפרויקט מוכן לשימוש! ניתן לגשת לעמוד `/discover` ולראות את הדמו עם כל המצבים.
+
+```typescriptreact
+// מצב טעינה
+<DataState status="loading" />
+
+// מצב ריק עם הודעה מותאמת
+<DataState 
+  status="empty" 
+  emptyFallback={<EmptyState title="No users found" />} 
+/>
+
+// מצב שגיאה
+<DataState status="error" />
+
+// מצב הצלחה עם תוכן
+<DataState status="success">
+  <div>Your content here</div>
+</DataState>
+```
+
+---
+

@@ -1,0 +1,94 @@
+הנה סדר עבודה מומלץ לפי “פיצ’רים” — בנוי מלמטה למעלה, כך שכל שלב מוסיף לבסיס יציב וממחזר רכיבים ותשתיות מהתכנון שלך:
+
+תשתית UI ואפליקציה (Foundation)
+
+AppLayout (Header / Navbar / Content / Footer), ניווט, טמפלייטים ל־DataState / InfiniteScroller / Skeletons.
+
+RTL מלא + Theme Manager עם תמיכה ב־Dark Mode (כולל צבעים, מודאלים, תפריטים ו־toasts).
+
+חיבור Zustand (UI) + React Query (נתונים).
+מבוסס על רשימת הרכיבים והמלצות RTL/Dark Mode/Skeletons.
+
+קונפיגורציה ו־DevOps קלים להמשך פיתוח
+
+איחוד מדיניות config: secrets רק ב־.env, כל ההגדרות הלא־רגישות ב־config.ts, תמיכה ל־HTTPS מקומי, ללא יצירה אוטומטית של .env.
+
+הכנת env.example ויישום “Single Source of Truth”.
+(יעזור למנוע חיכוכים בהמשך הפיצ’רים).
+
+מודלים וסכמות בסיס (DB First Pass)
+
+יצירת collections וסכמות: users, tags + אינדקסים נדרשים.
+
+הגדרת טיפוסים ב־TypeScript.
+(שאר המודלים יתווספו כשהפיצ’רים הרלוונטיים מגיעים).
+
+אימות וזהויות (Auth)
+
+Google OAuth + JWT + Refresh Tokens בצד השרת, מצב התחברות בצד הלקוח, מסכי Welcome/Auth.
+
+שמירה על עקרונות אבטחה ותשתית הרשאות.
+
+תגיות (Tags) — CRUD + Autocomplete
+
+slug normalized, אינדקס טקסט על label, אופציה ל־Atlas Search (n-gram).
+
+Endpoint /tags/search, רכיב TagPill, TagPicker.
+
+Onboarding Wizard
+
+זרימה לבחירת תגיות ופרטים בסיסיים למשתמש חדש, שמירה ל־users.tags.
+
+מעבר אוטומטי ל־Home/Discover אחרי השלמה.
+
+Discover (Tags & Users) + Pagination
+
+עמוד Discover: AddTagBar, TagsGrid, UsersList עם מיון/חיפוש.
+
+Cursor-based pagination + פרויקציה מצומצמת לשדות התצוגה.
+
+חישוב Match Score (Batch)
+
+יצירת match_scores ו־job לחישוב מראש (לא בזמן ריצה), עדכון בעת שינוי תגיות.
+
+אינדקסים לפי userId/score לשאילתות יעילות.
+
+Matches Page
+
+עמוד רשימת התאמות מסודר לפי הציון/Online/LastVisit, אינטגרציה עם match_scores.
+
+Profile + Photo Gallery
+
+פרופיל אישי (עריכה בסיסית, תגיות), העלאת תמונות דרך S3/Cloudinary — DB שומר URLs בלבד.
+
+Bookmarks
+
+שמירת משתמשים מועדפים + הערות (bookmarks) עם אינדקסים ו־UI מתאים.
+
+Friends (Friendship)
+
+בקשות/אישור/חסימה ברמת קשר, עמוד Friends.
+
+אינדקס ייחודי userA+userB.
+
+Settings: Blocked & Hidden
+
+עמוד הגדרות + API לסינון כבר בשרת (לא להחזיר משתמשים חסומים/מוסתרים).
+
+Chat MVP (Conversations/Messages)
+
+רשימת שיחות, ת׳רדים והודעה חדשה.
+
+בהמשך אפשר להוסיף realtime; ל־MVP מספיק polling/invalidations.
+
+Admin Panel (MVP)
+
+טבלת ניהול עם pagination, אינדקסים בסיסיים ופעולות נפוצות.
+
+ביצועים, נגישות ובדיקות
+
+כיסוי Unit/Integration/E2E לזרימות העיקריות.
+
+לוגים לאירועים מרכזיים (הוספת/הסרת תג, שמירה, שליחת הודעה).
+
+שיפורי UX: skeletons עקביים, מניעת layout shift, WCAG 2.1.
