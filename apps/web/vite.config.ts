@@ -8,10 +8,12 @@ export default defineConfig({
     port: 5173,
     host: 'localhost',
     // Support for HTTPS development
-    https: process.env.VITE_HTTPS === 'true' ? {
-      key: '../../apps/server/certs/server.key',
-      cert: '../../apps/server/certs/server.crt',
-    } : undefined,
+    ...(process.env['VITE_HTTPS'] === 'true' && {
+      https: {
+        key: '../../apps/server/certs/server.key',
+        cert: '../../apps/server/certs/server.crt',
+      },
+    }),
   },
   resolve: {
     alias: {

@@ -1,18 +1,24 @@
 {
+  "extends": "../../packages/tsconfig/base.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2023",
-    "lib": ["ES2023"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "module": "ESNext",
-    "types": ["node"],
-    "skipLibCheck": true,
-
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "types": ["node"],
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@models/*": ["../../packages/models/src/*"],
+      "@api/*": ["../../packages/api/src/*"],
+      "@config/*": ["../../packages/config/src/*"]
+    },
 
     /* Linting */
     "strict": true,
@@ -22,5 +28,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "postcss.config.js", "tailwind.config.js", "eslint.config.js"]
 }

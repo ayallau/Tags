@@ -614,37 +614,49 @@ git add . && git commit -m "feat(state): add Zustand UI store, app events, and R
 
 ---
 
+**User**
+
+אני רוצה לשמור את REFRESH_TOKEN_KEY ב- Cookies - Secure + HttpOnly
+
+---
+
 אני אבצע שינוי בקוד כדי לשמור את ה-REFRESH_TOKEN ב-Cookies עם הגדרות Secure ו-HttpOnly במקום localStorage.
 
-סיכום השינויים
+## סיכום השינויים
+
 ביצעתי את השינויים הבאים כדי לשמור את ה-REFRESH_TOKEN ב-Cookies עם הגדרות Secure ו-HttpOnly:
-שינויים ב-Client (packages/api/src/client.ts):
-הוספת פונקציות Cookie: setCookie, getCookie, deleteCookie
-עדכון LocalTokenStorage: ה-refresh token נשמר ב-cookie במקום localStorage
-הגדרות Cookie: Secure=true, SameSite=strict, MaxAge=30 ימים
-withCredentials: הוספתי לכל הבקשות כדי לכלול cookies
-עדכון performTokenRefresh: שולח בקשה ל-/auth/refresh עם cookies
-שינויים ב-Server (apps/server/src/controllers/authController.ts):
-הוספת refreshToken endpoint: מטפל ב-refresh tokens מ-cookies
-עדכון loginWithEmail: שומר refresh token ב-cookie עם HttpOnly
-עדכון loginWithProvider: מחזיר refresh token לשימוש ב-callback
-עדכון globalLogout: מנקה את ה-cookie
-הוספת verifyRefreshToken: וידוא תקינות ה-refresh token
-שינויים ב-Routes (apps/server/src/routes/auth.routes.ts):
-הוספת POST /auth/refresh: endpoint חדש לרענון tokens
-עדכון Google callback: שומר refresh token ב-cookie
-יתרונות אבטחה:
-HttpOnly: מונע גישה מ-JavaScript (הגנה מפני XSS)
-Secure: נשלח רק דרך HTTPS
-SameSite=strict: מונע התקפות CSRF
-Token Rotation: refresh token חדש בכל רענון
-Logout Invalidation: ביטול כל ה-tokens ב-logout
-בדיקות ידניות:
-התחברות - וודא שה-cookie נשמר עם הדגלים הנכונים
-קריאות API - וודא שרענון אוטומטי עובד
-התנתקות - וודא שה-cookie נמחק
-התנתקות גלובלית - וודא שכל הסשנים מבוטלים
-האם תרצה שאני אבצע בדיקות נוספות או שיש משהו ספציפי שתרצה לבדוק?
+
+### שינויים ב-Client (`packages/api/src/client.ts`):
+1. **הוספת פונקציות Cookie**: `setCookie`, `getCookie`, `deleteCookie`
+2. **עדכון LocalTokenStorage**: ה-refresh token נשמר ב-cookie במקום localStorage
+3. **הגדרות Cookie**: Secure=true, SameSite=strict, MaxAge=30 ימים
+4. **withCredentials**: הוספתי לכל הבקשות כדי לכלול cookies
+5. **עדכון performTokenRefresh**: שולח בקשה ל-`/auth/refresh` עם cookies
+
+### שינויים ב-Server (`apps/server/src/controllers/authController.ts`):
+1. **הוספת refreshToken endpoint**: מטפל ב-refresh tokens מ-cookies
+2. **עדכון loginWithEmail**: שומר refresh token ב-cookie עם HttpOnly
+3. **עדכון loginWithProvider**: מחזיר refresh token לשימוש ב-callback
+4. **עדכון globalLogout**: מנקה את ה-cookie
+5. **הוספת verifyRefreshToken**: וידוא תקינות ה-refresh token
+
+### שינויים ב-Routes (`apps/server/src/routes/auth.routes.ts`):
+1. **הוספת POST /auth/refresh**: endpoint חדש לרענון tokens
+2. **עדכון Google callback**: שומר refresh token ב-cookie
+
+### יתרונות אבטחה:
+- **HttpOnly**: מונע גישה מ-JavaScript (הגנה מפני XSS)
+- **Secure**: נשלח רק דרך HTTPS
+- **SameSite=strict**: מונע התקפות CSRF
+- **Token Rotation**: refresh token חדש בכל רענון
+- **Logout Invalidation**: ביטול כל ה-tokens ב-logout
+
+### בדיקות ידניות:
+1. התחברות - וודא שה-cookie נשמר עם הדגלים הנכונים
+2. קריאות API - וודא שרענון אוטומטי עובד
+3. התנתקות - וודא שה-cookie נמחק
+4. התנתקות גלובלית - וודא שכל הסשנים מבוטלים
+
 
 ---
 
