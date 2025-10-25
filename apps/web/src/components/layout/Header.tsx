@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 
 export function Header() {
   return (
-    <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+    <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60'>
       <div className='container mx-auto px-4'>
         <div className='flex h-16 items-center justify-between'>
           {/* Left side - Logo and App Name */}
-          <Link 
-            to='/' 
+          <Link
+            to='/'
             className='flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-md'
           >
             <img src={logo} alt='Tags Logo' className='h-16 w-16' />
