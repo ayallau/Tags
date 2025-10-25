@@ -2,7 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import { verifyPassword, hashPassword } from "../utils/passwords.js";
 import {
   createAccessToken,
+  createRefreshToken,
   verifyAccessToken,
+  verifyRefreshToken,
 } from "../services/tokenService.js";
 import { findByEmailLower, createUser } from "../services/userService.js";
 import User from "../models/User.js";
@@ -40,15 +42,18 @@ export async function loginWithEmail(
       return res.status(400).json({ error: "Invalid credentials" });
     }
     const accessToken = createAccessToken(user, "email");
+    const refreshToken = createRefreshToken(user);
 
-    // TODO: In the future - add refresh token creation and sending in cookies:
-    // const refreshToken = createRefreshToken(user);
-    // res.cookie('refreshToken', refreshToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'strict',
-    //   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    // });
+    // Set refresh token in HttpOnly cookie
+    res.cookie("tags_refresh_token", refreshToken, {
+      httpOnly: true,
+      secure:
+        process.env.NODE_ENV === "production" ||
+        process.env.SSL_ENABLED === "true",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      path: "/",
+    });
 
     return res.json({ accessToken });
   } catch (err) {
@@ -91,12 +96,8 @@ export function loginWithProvider(
   provider: string
 ): AuthResponseDto {
   const accessToken = createAccessToken(user, provider);
-
-  // TODO: In the future - add refresh token:
-  // const refreshToken = createRefreshToken(user);
-  // return { accessToken, refreshToken }; // Will be returned to callback to send in cookies
-
-  return { accessToken };
+  const refreshToken = createRefreshToken(user);
+  return { accessToken, refreshToken };
 }
 
 /**
@@ -278,6 +279,64 @@ export function logout(
 }
 
 /**
+ * Refresh access token using refresh token from cookie
+ */
+export async function refreshToken(
+  req: Request,
+  res: Response<AuthResponseDto | { error: string }>,
+  next: NextFunction
+): Promise<any> {
+  try {
+    const refreshToken = req.cookies?.tags_refresh_token;
+
+    if (!refreshToken) {
+      return res.status(401).json({ error: "No refresh token provided" });
+    }
+
+    // Verify refresh token
+    const payload = verifyRefreshToken(refreshToken);
+
+    // Find user and verify token version
+    const user = await User.findById(payload.sub);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    // Check if token version matches (for logout invalidation)
+    if ((user.tokenVersion ?? 0) !== (payload.tv ?? -1)) {
+      return res.status(401).json({ error: "Token revoked due to logout" });
+    }
+
+    // Create new tokens
+    const newAccessToken = createAccessToken(user, "refresh");
+    const newRefreshToken = createRefreshToken(user);
+
+    // Update refresh token in cookie
+    res.cookie("tags_refresh_token", newRefreshToken, {
+      httpOnly: true,
+      secure:
+        process.env.NODE_ENV === "production" ||
+        process.env.SSL_ENABLED === "true",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      path: "/",
+    });
+
+    return res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      (err.name === "JsonWebTokenError" || err.name === "TokenExpiredError")
+    ) {
+      return res
+        .status(401)
+        .json({ error: "Invalid or expired refresh token" });
+    }
+    next(err);
+  }
+}
+
+/**
  * Global logout - invalidates all user tokens
  * TODO: In the future - add refresh token deletion from cookies and invalidate all refresh tokens in database
  */
@@ -308,16 +367,15 @@ export async function globalLogout(
       $inc: { tokenVersion: 1 },
     });
 
-    // TODO: כאשר יוגדרו refresh tokens, הוסף:
-    // 1. מחיקת refresh token מעוגיות
-    // res.clearCookie('refreshToken', {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'strict'
-    // });
-    //
-    // 2. ביטול כל refresh tokens במסד הנתונים (אם מאוחסנים שם)
-    // await RefreshToken.deleteMany({ userId: user._id });
+    // Clear refresh token from cookies
+    res.clearCookie("tags_refresh_token", {
+      httpOnly: true,
+      secure:
+        process.env.NODE_ENV === "production" ||
+        process.env.SSL_ENABLED === "true",
+      sameSite: "strict",
+      path: "/",
+    });
 
     console.log(
       `[${new Date().toISOString()}] Global logout for user ${String(user._id)} - tokenVersion incremented`

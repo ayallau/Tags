@@ -1,5 +1,9 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
-import type { ApiResponse } from '../../models/dist/api.js';
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+} from "axios";
+import type { ApiResponse } from "../../models/dist/api.js";
 
 // API Configuration
 export interface ApiConfig {
@@ -18,39 +22,86 @@ export interface TokenStorage {
   removeRefreshToken(): void;
 }
 
-// Default token storage using localStorage
+// Cookie utility functions
+function setCookie(
+  name: string,
+  value: string,
+  options: {
+    secure?: boolean;
+    sameSite?: "strict" | "lax" | "none";
+    maxAge?: number;
+    path?: string;
+  } = {}
+): void {
+  if (typeof document === "undefined") return;
+
+  const {
+    secure = true,
+    sameSite = "strict",
+    maxAge = 7 * 24 * 60 * 60, // 7 days default
+    path = "/",
+  } = options;
+
+  let cookieString = `${name}=${value}; Path=${path}; Max-Age=${maxAge}; SameSite=${sameSite}`;
+
+  if (secure) {
+    cookieString += "; Secure";
+  }
+
+  document.cookie = cookieString;
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return parts.pop()?.split(";").shift() || null;
+  }
+  return null;
+}
+
+function deleteCookie(name: string, path: string = "/"): void {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; Path=${path}; Max-Age=0`;
+}
+
+// Default token storage using localStorage for access token and cookies for refresh token
 class LocalTokenStorage implements TokenStorage {
-  private readonly ACCESS_TOKEN_KEY = 'tags_access_token';
-  private readonly REFRESH_TOKEN_KEY = 'tags_refresh_token';
+  private readonly ACCESS_TOKEN_KEY = "tags_access_token";
+  private readonly REFRESH_TOKEN_KEY = "tags_refresh_token";
 
   getAccessToken(): string | null {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     return window.localStorage.getItem(this.ACCESS_TOKEN_KEY);
   }
 
   setAccessToken(token: string): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.setItem(this.ACCESS_TOKEN_KEY, token);
   }
 
   removeAccessToken(): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.removeItem(this.ACCESS_TOKEN_KEY);
   }
 
   getRefreshToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return window.localStorage.getItem(this.REFRESH_TOKEN_KEY);
+    return getCookie(this.REFRESH_TOKEN_KEY);
   }
 
   setRefreshToken(token: string): void {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
+    setCookie(this.REFRESH_TOKEN_KEY, token, {
+      secure: true,
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+      path: "/",
+    });
   }
 
   removeRefreshToken(): void {
-    if (typeof window === 'undefined') return;
-    window.localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    deleteCookie(this.REFRESH_TOKEN_KEY);
   }
 }
 
@@ -63,12 +114,13 @@ export class ApiClient {
 
   constructor(config: ApiConfig, tokenStorage?: TokenStorage) {
     this.tokenStorage = tokenStorage || new LocalTokenStorage();
-    
+
     this.client = axios.create({
       baseURL: config.baseURL,
       timeout: config.timeout || 10000,
+      withCredentials: true, // Include cookies in all requests
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...config.headers,
       },
     });
@@ -133,22 +185,19 @@ export class ApiClient {
   }
 
   private async performTokenRefresh(): Promise<string> {
-    const refreshToken = this.tokenStorage.getRefreshToken();
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-
     try {
-      const response = await axios.post(`${this.client.defaults.baseURL}/auth/refresh`, {
-        refreshToken,
-      });
+      const response = await axios.post(
+        `${this.client.defaults.baseURL}/auth/refresh`,
+        {},
+        {
+          withCredentials: true, // Include cookies in request
+        }
+      );
 
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-      
+      const { accessToken } = response.data;
+
       this.tokenStorage.setAccessToken(accessToken);
-      if (newRefreshToken) {
-        this.tokenStorage.setRefreshToken(newRefreshToken);
-      }
+      // Refresh token is automatically updated in cookie by server
 
       return accessToken;
     } catch (error) {
@@ -164,34 +213,70 @@ export class ApiClient {
 
   private handleAuthError(): void {
     // Emit custom event or call callback
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('auth:logout'));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("auth:logout"));
     }
   }
 
   // Public methods
-  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<ApiResponse<T>> = await this.client.get(url, config);
+  async get<T = any>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    const response: AxiosResponse<ApiResponse<T>> = await this.client.get(
+      url,
+      config
+    );
     return response.data;
   }
 
-  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<ApiResponse<T>> = await this.client.post(url, data, config);
+  async post<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    const response: AxiosResponse<ApiResponse<T>> = await this.client.post(
+      url,
+      data,
+      config
+    );
     return response.data;
   }
 
-  async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<ApiResponse<T>> = await this.client.put(url, data, config);
+  async put<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    const response: AxiosResponse<ApiResponse<T>> = await this.client.put(
+      url,
+      data,
+      config
+    );
     return response.data;
   }
 
-  async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<ApiResponse<T>> = await this.client.patch(url, data, config);
+  async patch<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    const response: AxiosResponse<ApiResponse<T>> = await this.client.patch(
+      url,
+      data,
+      config
+    );
     return response.data;
   }
 
-  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<ApiResponse<T>> = await this.client.delete(url, config);
+  async delete<T = any>(
+    url: string,
+    config?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> {
+    const response: AxiosResponse<ApiResponse<T>> = await this.client.delete(
+      url,
+      config
+    );
     return response.data;
   }
 

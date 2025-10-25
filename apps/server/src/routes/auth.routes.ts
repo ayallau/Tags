@@ -11,6 +11,7 @@ import {
   loginWithProvider,
   forgotPassword,
   resetPassword,
+  refreshToken,
   logout,
   globalLogout,
 } from "../controllers/authController.js";
@@ -22,6 +23,9 @@ router.post("/login", loginWithEmail);
 
 // Register a new user with email/password
 router.post("/register", registerWithEmail);
+
+// Refresh access token
+router.post("/refresh", refreshToken);
 
 // Password Reset Routes
 
@@ -108,17 +112,20 @@ router.get(
       }
       const result = loginWithProvider(req.user, "google");
 
-      // TODO: In the future - add refresh token sending in cookies:
-      // if (result.refreshToken) {
-      //   res.cookie('refreshToken', result.refreshToken, {
-      //     httpOnly: true,
-      //     secure: process.env.NODE_ENV === 'production',
-      //     sameSite: 'strict',
-      //     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      //   });
-      // }
+      // Set refresh token in HttpOnly cookie
+      if (result.refreshToken) {
+        res.cookie("tags_refresh_token", result.refreshToken, {
+          httpOnly: true,
+          secure:
+            process.env.NODE_ENV === "production" ||
+            process.env.SSL_ENABLED === "true",
+          sameSite: "strict",
+          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+          path: "/",
+        });
+      }
 
-      res.json(result);
+      res.json({ accessToken: result.accessToken });
     } catch (err) {
       next(err);
     }
