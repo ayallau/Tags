@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { useCallback } from 'react';
 
 // Toast types
 export type ToastType = 'info' | 'success' | 'warn' | 'error';
@@ -16,10 +17,10 @@ export interface Toast {
 interface UIState {
   // Modals state
   modals: Record<string, boolean>;
-  
+
   // Toasts queue
   toastsQueue: Toast[];
-  
+
   // Filters state
   filters: Record<string, unknown>;
 }
@@ -30,12 +31,12 @@ interface UIActions {
   openModal: (id: string) => void;
   closeModal: (id: string) => void;
   toggleModal: (id: string) => void;
-  
+
   // Toast actions
   pushToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
   clearToasts: () => void;
-  
+
   // Filter actions
   setFilter: (key: string, value: unknown) => void;
   resetFilters: () => void;
@@ -66,7 +67,7 @@ export const useUIStore = create<UIStore>()(
       // Modal actions
       openModal: (id: string) =>
         set(
-          (state) => ({
+          state => ({
             modals: { ...state.modals, [id]: true },
           }),
           false,
@@ -75,7 +76,7 @@ export const useUIStore = create<UIStore>()(
 
       closeModal: (id: string) =>
         set(
-          (state) => ({
+          state => ({
             modals: { ...state.modals, [id]: false },
           }),
           false,
@@ -84,7 +85,7 @@ export const useUIStore = create<UIStore>()(
 
       toggleModal: (id: string) =>
         set(
-          (state) => ({
+          state => ({
             modals: { ...state.modals, [id]: !state.modals[id] },
           }),
           false,
@@ -100,7 +101,7 @@ export const useUIStore = create<UIStore>()(
         };
 
         set(
-          (state) => ({
+          state => ({
             toastsQueue: [...state.toastsQueue, newToast],
           }),
           false,
@@ -117,40 +118,30 @@ export const useUIStore = create<UIStore>()(
 
       removeToast: (id: string) =>
         set(
-          (state) => ({
-            toastsQueue: state.toastsQueue.filter((toast) => toast.id !== id),
+          state => ({
+            toastsQueue: state.toastsQueue.filter(toast => toast.id !== id),
           }),
           false,
           `removeToast/${id}`
         ),
 
-      clearToasts: () =>
-        set(
-          { toastsQueue: [] },
-          false,
-          'clearToasts'
-        ),
+      clearToasts: () => set({ toastsQueue: [] }, false, 'clearToasts'),
 
       // Filter actions
       setFilter: (key: string, value: unknown) =>
         set(
-          (state) => ({
+          state => ({
             filters: { ...state.filters, [key]: value },
           }),
           false,
           `setFilter/${key}`
         ),
 
-      resetFilters: () =>
-        set(
-          { filters: {} },
-          false,
-          'resetFilters'
-        ),
+      resetFilters: () => set({ filters: {} }, false, 'resetFilters'),
 
       clearFilter: (key: string) =>
         set(
-          (state) => {
+          state => {
             const newFilters = { ...state.filters };
             delete newFilters[key];
             return { filters: newFilters };
@@ -168,26 +159,53 @@ export const useUIStore = create<UIStore>()(
 );
 
 // Selectors for better performance
-export const useModal = (id: string) => useUIStore((state) => state.modals[id] || false);
-export const useToasts = () => useUIStore((state) => state.toastsQueue);
-export const useFilters = () => useUIStore((state) => state.filters);
-export const useFilter = (key: string) => useUIStore((state) => state.filters[key]);
+export const useModal = (id: string) => useUIStore(state => state.modals[id] || false);
+export const useToasts = () => useUIStore(state => state.toastsQueue);
+export const useFilters = () => useUIStore(state => state.filters);
+export const useFilter = (key: string) => useUIStore(state => state.filters[key]);
 
-// Action selectors
-export const useModalActions = () => useUIStore((state) => ({
-  openModal: state.openModal,
-  closeModal: state.closeModal,
-  toggleModal: state.toggleModal,
-}));
+// Action selectors - use useCallback to prevent infinite loops
+export const useModalActions = () => {
+  const openModal = useUIStore(state => state.openModal);
+  const closeModal = useUIStore(state => state.closeModal);
+  const toggleModal = useUIStore(state => state.toggleModal);
 
-export const useToastActions = () => useUIStore((state) => ({
-  pushToast: state.pushToast,
-  removeToast: state.removeToast,
-  clearToasts: state.clearToasts,
-}));
+  return useCallback(
+    () => ({
+      openModal,
+      closeModal,
+      toggleModal,
+    }),
+    [openModal, closeModal, toggleModal]
+  )();
+};
 
-export const useFilterActions = () => useUIStore((state) => ({
-  setFilter: state.setFilter,
-  resetFilters: state.resetFilters,
-  clearFilter: state.clearFilter,
-}));
+export const useToastActions = () => {
+  const pushToast = useUIStore(state => state.pushToast);
+  const removeToast = useUIStore(state => state.removeToast);
+  const clearToasts = useUIStore(state => state.clearToasts);
+
+  return useCallback(
+    () => ({
+      pushToast,
+      removeToast,
+      clearToasts,
+    }),
+    [pushToast, removeToast, clearToasts]
+  )();
+};
+
+export const useFilterActions = () => {
+  const setFilter = useUIStore(state => state.setFilter);
+  const resetFilters = useUIStore(state => state.resetFilters);
+  const clearFilter = useUIStore(state => state.clearFilter);
+
+  return useCallback(
+    () => ({
+      setFilter,
+      resetFilters,
+      clearFilter,
+    }),
+    [setFilter, resetFilters, clearFilter]
+  )();
+};

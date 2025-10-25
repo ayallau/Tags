@@ -1,3 +1,4 @@
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useUIStore } from '../state/ui';
@@ -5,17 +6,17 @@ import { useUIStore } from '../state/ui';
 // Query error handler that maps errors to toasts
 const queryErrorHandler = (error: unknown): void => {
   console.error('Query error:', error);
-  
+
   // Get toast actions from the store
   const { pushToast } = useUIStore.getState();
-  
+
   // Map error to toast
   let errorMessage = 'An unexpected error occurred';
   let errorType: 'error' | 'warn' = 'error';
-  
+
   if (error instanceof Error) {
     errorMessage = error.message;
-    
+
     // Map specific error types
     if (error.message.includes('404')) {
       errorMessage = 'Resource not found';
@@ -32,7 +33,7 @@ const queryErrorHandler = (error: unknown): void => {
       errorMessage = 'Network connection failed';
     }
   }
-  
+
   // Push toast notification (non-blocking)
   try {
     pushToast({
@@ -53,7 +54,7 @@ export const queryClient = new QueryClient({
       // Data freshness settings
       staleTime: 30_000, // 30 seconds
       gcTime: 5 * 60_000, // 5 minutes (formerly cacheTime)
-      
+
       // Retry settings
       retry: (failureCount, error) => {
         // Don't retry on 404 or 401 errors
@@ -65,19 +66,19 @@ export const queryClient = new QueryClient({
         // Retry once for other errors
         return failureCount < 1;
       },
-      
+
       // Refetch settings
       refetchOnWindowFocus: false, // Don't refetch when window gains focus
       refetchOnReconnect: true, // Refetch when network reconnects
       refetchOnMount: true, // Refetch when component mounts
-      
+
       // Error handling
       throwOnError: false, // Don't throw errors to components
     },
     mutations: {
       // Retry mutations once
       retry: 1,
-      
+
       // Error handling for mutations
       onError: queryErrorHandler,
     },
@@ -93,18 +94,9 @@ export function QueryProvider({ children }: QueryProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      
+
       {/* React Query Devtools - only in development */}
-      {import.meta.env.DEV && (
-        <ReactQueryDevtools
-          initialIsOpen={false}
-          position="bottom-right"
-          buttonPosition="bottom-right"
-        />
-      )}
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} position='bottom' />}
     </QueryClientProvider>
   );
 }
-
-// React import for JSX
-import React from 'react';
