@@ -9,9 +9,7 @@ export default function HomePage() {
       </div>
 
       {/* Demo Controls - only in development */}
-      {import.meta.env.DEV && (
-        <DemoControls />
-      )}
+      {import.meta.env.DEV && <DemoControls />}
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         <div className='bg-surface border border-border rounded-lg p-6'>

@@ -618,6 +618,83 @@ git add . && git commit -m "feat(state): add Zustand UI store, app events, and R
 
 ---
 
+[Project Rules]
+- Load and follow (in this order):
+  1) .cursor\rules\project_guideline.mdc
+  2) .cursor\rules\project_rules.mdc
+  3) .cursor\rules\Recommended_Project_Plan.mdc
+- Do NOT create/update .env (use .env.example only if needed).
+- Keep ESM + TypeScript "NodeNext".
+- Before changes, make a checkpoint commit:
+  git add . && git commit -m "checkpoint: before DataState & EmptyState"
+
+[Design reference]
+- Attach: apps\web\public\DesignReference\Discover_Page.png
+- Use as inspiration only (layout/spacing/feel). No pixel-perfect copying.
+
+[Task]
+הוסף רכיבי מצב נתונים לשימוש חוזר, כדי לאחד התנהגות טעינה/ריק/שגיאה בכל המסכים:
+1) DataState (wrapper)
+   - קובץ: src/components/data/DataState.tsx
+   - API מוצע:
+     props: {
+       status: 'idle' | 'loading' | 'empty' | 'error' | 'success';
+       loadingFallback?: ReactNode;     // אם לא הועבר – השתמש ב-PageSkeleton
+       emptyFallback?: ReactNode;       // אם לא הועבר – השתמש ב-<EmptyState/>
+       errorFallback?: ReactNode;       // אם לא הועבר – השתמש ב-<EmptyState variant="error"/>
+       children?: ReactNode;            // מוצג ב-success בלבד
+       'aria-busy'?: boolean;           // נגזר מ-status=loading כברירת מחדל
+       'aria-live'?: 'polite'|'assertive'|'off'; // ברירת מחדל: polite בטעינה/שגיאה
+     }
+   - התנהגות: מצבי ARIA נכונים, תמיכה ב-RTL וב-Dark Mode, ללא layout shift.
+
+2) EmptyState (component)
+   - קובץ: src/components/data/EmptyState.tsx
+   - API מוצע:
+     props: {
+       title?: string;
+       description?: string;
+       icon?: ReactNode;                 // אייקון Radix/shadcn
+       cta?: ReactNode;                  // כפתור/קישור אופציונלי
+       variant?: 'default'|'error'|'info'|'success'|'warning';
+       className?: string;
+     }
+   - סגנונות נגישים עם ניגודיות AA; התאמות צבע לפי טוקנים (semantic).
+
+3) Wire demo in Discover page
+   - בעמוד /discover הצג דמו קצר:
+     - מצב loading: שימוש ב-DataState עם PageSkeleton.
+     - מצב empty: שימוש ב-<EmptyState title="No results" ... />.
+     - מצב error: דמו לאירוע שגיאה (לדוגמה, כפתור שמדמה שגיאה).
+     - מצב success: placeholder grid קטן (אפשר להשתמש ב-TileSkeleton בעברית? לא – כאן תצוגה אמיתית קצרה).
+
+4) A11y & Motion
+   - loading/existing containers: role="status", aria-live="polite".
+   - focus-visible ברור ל-CTA.
+   - כבדיקה: כבה אנימציות כש-prefers-reduced-motion.
+
+[Deliverables]
+- src/components/data/DataState.tsx
+- src/components/data/EmptyState.tsx
+- עדכון מסך /discover להדגמה של כל המצבים (ניתן עם toggle קטן/כפתורים לצורך דמו בלבד).
+
+[Acceptance Criteria]
+- ב-/discover ניתן להחליף בין loading/empty/error/success ולראות תצוגה מתאימה בלי קפיצות Layout.
+- EmptyState מציג כותרת/תיאור/אייקון/CTA ונראה תקין ב-Light/Dark.
+- ARIA: בזמן טעינה aria-busy=true ו-aria-live="polite"; ב-error יש role="alert" או aria-live="assertive".
+- אין TypeScript/ESLint/Tailwind errors.
+
+[Manual Tests]
+- החלף Theme: התצוגות נראות טוב בשני המצבים.
+- Keyboard-only: ניתן להגיע ל-CTA של EmptyState; focus ברור.
+- הפעਲ prefers-reduced-motion: אין שימר/אנימציות מיותרות.
+- RTL: הטקסט מיושר נכון; אין גלילה אופקית מיותרת.
+
+[After completion]
+Run:
+git add . && git commit -m "feat(ui): add reusable DataState & EmptyState and demo on /discover"
+
+
 ---
 
 **Cursor**
