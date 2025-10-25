@@ -104,6 +104,24 @@ html {
   scroll-behavior: smooth;
 }
 
+/* RTL support */
+[dir='rtl'] {
+  direction: rtl;
+}
+
+[dir='rtl'] .rtl\:text-left {
+  text-align: left;
+}
+
+[dir='rtl'] .rtl\:text-right {
+  text-align: right;
+}
+
+/* Prevent horizontal overflow in RTL */
+[dir='rtl'] {
+  overflow-x: hidden;
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
@@ -116,6 +134,20 @@ body {
 :focus-visible {
   outline: 2px solid hsl(var(--focus));
   outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Enhanced focus styles for interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid hsl(var(--focus));
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+  box-shadow: 0 0 0 2px hsl(var(--focus-ring));
 }
 
 /* Reduced motion */
@@ -127,6 +159,20 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  
+  /* Disable pulse animations for skeletons */
+  .animate-pulse {
+    animation: none !important;
+  }
+  
+  /* Disable hover transitions */
+  .hover\\:opacity-80:hover {
+    opacity: 1 !important;
+  }
+  
+  .hover\\:bg-muted\\/80:hover {
+    background-color: inherit !important;
   }
 }
 
@@ -149,15 +195,52 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+/* Keyboard navigation improvements */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Ensure focus is visible on all interactive elements */
+*:focus-visible {
+  outline: 2px solid hsl(var(--focus));
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   :root {
     --border: 0 0% 0%;
     --border-hover: 0 0% 0%;
+    --foreground: 0 0% 0%;
+    --foreground-muted: 0 0% 20%;
   }
 
   .dark {
     --border: 0 0% 100%;
     --border-hover: 0 0% 100%;
+    --foreground: 0 0% 100%;
+    --foreground-muted: 0 0% 80%;
+  }
+  
+  /* Ensure minimum contrast for interactive elements */
+  button, a, input, textarea, select {
+    border: 2px solid currentColor;
   }
 }

@@ -38,10 +38,12 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
           'text-foreground',
           'transition-colors duration-200',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
-          'aria-expanded={isOpen}'
+          ''
         )}
         aria-label='Select theme'
         aria-haspopup='true'
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? 'theme-menu' : undefined}
       >
         <CurrentIcon className='w-4 h-4' />
         <span className='text-sm font-medium'>{currentOption.label}</span>
@@ -49,6 +51,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 
       {isOpen && (
         <div
+          id='theme-menu'
           className={cn(
             'absolute top-full left-0 mt-1 w-48',
             'bg-surface border border-border rounded-md shadow-lg',

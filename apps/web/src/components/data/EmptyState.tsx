@@ -60,8 +60,8 @@ export function EmptyState({
         styles.container,
         className
       )}
-      role="status"
-      aria-live="polite"
+      role={variant === 'error' ? 'alert' : 'status'}
+      aria-live={variant === 'error' ? 'assertive' : 'polite'}
     >
       {icon && (
         <div className={cn('mb-4', styles.icon)}>
