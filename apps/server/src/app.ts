@@ -1,4 +1,8 @@
-import express, { type RequestHandler } from "express";
+import express, {
+  type RequestHandler,
+  type Request,
+  type Response as ExpressResponse,
+} from "express";
 import cors, { type CorsOptions } from "cors";
 import cookieParser from "cookie-parser";
 import passport from "./services/passport.js";
@@ -11,6 +15,8 @@ import swaggerUi from "swagger-ui-express";
 import https from "node:https";
 import fs from "node:fs";
 import { readFileSync } from "node:fs";
+import logger from "./lib/logger.js";
+import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -29,13 +35,38 @@ try {
 
 try {
   await mongoose.connect(config.MONGO_URI);
-  console.log("MongoDB connected");
+  logger.info("MongoDB connected");
 } catch (err) {
-  console.error("MongoDB connection error:", err);
+  logger.error(
+    "MongoDB connection error",
+    undefined,
+    err instanceof Error ? err : undefined
+  );
   process.exit(1);
 }
 
 const app = express();
+
+// Request ID middleware (must be first)
+app.use(
+  (req: Request & { requestId?: string; startTime?: number }, _res, next) => {
+    req.requestId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    req.startTime = Date.now();
+    next();
+  }
+);
+
+// Request logging middleware (dev only)
+if (process.env.NODE_ENV === "development") {
+  app.use(
+    (req: Request & { requestId?: string; startTime?: number }, _res, next) => {
+      logger.debug(`→ ${req.method} ${req.originalUrl}`, {
+        requestId: req.requestId,
+      });
+      next();
+    }
+  );
+}
 
 // CORS Configuration
 const corsOptions: CorsOptions = {
@@ -49,6 +80,30 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(passport.initialize());
+
+// Response time logging middleware
+app.use(
+  (
+    req: Request & { requestId?: string; startTime?: number },
+    res: ExpressResponse,
+    next
+  ) => {
+    const startTime = req.startTime || Date.now();
+
+    const originalEnd = res.end.bind(res);
+    const wrappedEnd = res.end;
+
+    res.end = function (chunk?: unknown, encoding?: BufferEncoding | unknown) {
+      if (wrappedEnd === res.end && req.startTime) {
+        const duration = Date.now() - startTime;
+        logger.request(req, res, duration);
+      }
+      return originalEnd(chunk, encoding as BufferEncoding);
+    };
+
+    next();
+  }
+);
 
 // Basic route to test server
 const rootHandler: RequestHandler = (_req, res): void => {
@@ -113,6 +168,10 @@ if (isDev) {
   );
 }
 
+// Error handling middleware (must be last)
+app.use(notFoundHandler);
+app.use(errorHandler);
+
 // Start the server
 let server: any;
 
@@ -124,28 +183,32 @@ if (config.SSL_ENABLED) {
     };
 
     server = https.createServer(options, app).listen(config.PORT, (): void => {
-      console.log(
+      logger.info(
         `🚀 Server is running on HTTPS: https://localhost:${config.PORT}`
       );
-      console.log(`📱 Client URL: ${config.CLIENT_URL}`);
+      logger.info(`📱 Client URL: ${config.CLIENT_URL}`);
       if (isDev) {
-        console.log("📚 OpenAPI: /openapi.yaml | Swagger UI: /docs");
+        logger.info("📚 OpenAPI: /openapi.yaml | Swagger UI: /docs");
       }
     });
   } catch (error) {
-    console.error("❌ Failed to start HTTPS server:", error);
-    console.log("💡 Make sure SSL certificates exist in apps/server/certs/");
-    console.log("💡 Or run with HTTP: pnpm dev:http");
+    logger.error(
+      "❌ Failed to start HTTPS server",
+      undefined,
+      error instanceof Error ? error : undefined
+    );
+    logger.info("💡 Make sure SSL certificates exist in apps/server/certs/");
+    logger.info("💡 Or run with HTTP: pnpm dev:http");
     process.exit(1);
   }
 } else {
   server = app.listen(config.PORT, (): void => {
-    console.log(
+    logger.info(
       `🚀 Server is running on HTTP: http://localhost:${config.PORT}`
     );
-    console.log(`📱 Client URL: ${config.CLIENT_URL}`);
+    logger.info(`📱 Client URL: ${config.CLIENT_URL}`);
     if (isDev) {
-      console.log("📚 OpenAPI: /openapi.yaml | Swagger UI: /docs");
+      logger.info("📚 OpenAPI: /openapi.yaml | Swagger UI: /docs");
     }
   });
 }
