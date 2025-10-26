@@ -3,7 +3,7 @@
  * Multi-step wizard for new user onboarding
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { StepProgress } from './StepProgress';
@@ -24,14 +24,69 @@ type OnboardingStep = 'welcome' | 'profile' | 'tags' | 'finish';
 
 const TOTAL_STEPS = 4;
 
+// LocalStorage keys
+const STORAGE_KEYS = {
+  CURRENT_STEP: 'onboarding_current_step',
+  PROFILE_INFO: 'onboarding_profile_info',
+  SELECTED_TAGS: 'onboarding_selected_tags',
+};
+
+// Helper functions for localStorage
+const saveToStorage = (key: string, value: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to save to localStorage for key ${key}:`, error);
+  }
+};
+
+const loadFromStorage = <T,>(key: string, defaultValue: T): T => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to load from localStorage for key ${key}:`, error);
+    return defaultValue;
+  }
+};
+
+const clearOnboardingStorage = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_STEP);
+    localStorage.removeItem(STORAGE_KEYS.PROFILE_INFO);
+    localStorage.removeItem(STORAGE_KEYS.SELECTED_TAGS);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to clear onboarding storage:', error);
+  }
+};
+
 export function OnboardingWizard() {
   const navigate = useNavigate();
   const updateUserMutation = useUpdateUser();
 
-  const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
-  const [profileInfo, setProfileInfo] = useState<ProfileInfo>({});
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  // Initialize state from localStorage
+  const [currentStep, setCurrentStep] = useState<OnboardingStep>(() =>
+    loadFromStorage(STORAGE_KEYS.CURRENT_STEP, 'welcome')
+  );
+  const [profileInfo, setProfileInfo] = useState<ProfileInfo>(() => loadFromStorage(STORAGE_KEYS.PROFILE_INFO, {}));
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(() => loadFromStorage(STORAGE_KEYS.SELECTED_TAGS, []));
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.CURRENT_STEP, currentStep);
+  }, [currentStep]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.PROFILE_INFO, profileInfo);
+  }, [profileInfo]);
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.SELECTED_TAGS, selectedTags);
+  }, [selectedTags]);
 
   const stepIndex = {
     welcome: 1,
@@ -95,6 +150,9 @@ export function OnboardingWizard() {
 
       await updateUserMutation.mutateAsync(updateData);
 
+      // Clear onboarding storage after successful submission
+      clearOnboardingStorage();
+
       // Navigate to discover page
       navigate('/discover');
     } catch (error) {
@@ -127,6 +185,9 @@ export function OnboardingWizard() {
 
       setIsSubmitting(false);
 
+      // Clear onboarding storage after saving partial data
+      clearOnboardingStorage();
+
       // Navigate to home page
       navigate('/discover');
     } catch (error) {
@@ -134,6 +195,9 @@ export function OnboardingWizard() {
       // eslint-disable-next-line no-console
       console.error('Failed to save partial onboarding data:', error);
       setIsSubmitting(false);
+
+      // Clear storage even if save fails
+      clearOnboardingStorage();
 
       // Even if save fails, navigate to home
       navigate('/discover');
