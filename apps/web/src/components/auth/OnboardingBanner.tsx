@@ -25,7 +25,12 @@ export function OnboardingBanner() {
         <p className='text-sm font-medium'>
           You haven&apos;t completed your profile setup yet. Complete it to start matching with others.
         </p>
-        <Button onClick={handleCompleteOnboarding} variant='secondary' size='sm' className='whitespace-nowrap'>
+        <Button
+          onClick={handleCompleteOnboarding}
+          variant='outline'
+          size='lg'
+          className='border-primary-foreground/20 bg-background/10 text-primary-foreground hover:bg-background/20 hover:border-primary-foreground/40 transition-all hover:shadow-sm text-sm whitespace-nowrap'
+        >
           Complete Setup
         </Button>
       </div>
