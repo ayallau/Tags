@@ -1,5 +1,6 @@
 // src/dtos/user.dto.ts
 import type { IUser } from "../models/User.js";
+import { z } from "zod";
 
 // ========================================
 // Response DTO
@@ -30,6 +31,51 @@ export function toUserDto(user: IUser): UserDto {
 }
 
 // ========================================
+// Zod Schemas
+// ========================================
+
+/**
+ * Schema for updating user profile (bio, location, avatarUrl)
+ * Tags are managed separately via TagManagement
+ */
+export const UpdateProfileSchema = z.object({
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must be at most 30 characters")
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      "Username can only contain letters, numbers, underscores, and hyphens"
+    )
+    .optional(),
+  bio: z
+    .string()
+    .max(500, "Bio must be at most 500 characters")
+    .optional()
+    .or(z.literal("")),
+  location: z
+    .string()
+    .max(100, "Location must be at most 100 characters")
+    .optional()
+    .or(z.literal("")),
+  avatarUrl: z.string().url("Invalid URL format").or(z.literal("")).optional(),
+});
+
+/**
+ * Schema for updating user tags (managed separately)
+ */
+export const UpdateTagsSchema = z.object({
+  tags: z.array(z.string()).max(20, "Cannot have more than 20 tags"),
+});
+
+/**
+ * Schema for updating user photos (for future Photo Gallery feature)
+ */
+export const UpdatePhotosSchema = z.object({
+  photos: z.array(z.string().url()).max(10, "Cannot have more than 10 photos"),
+});
+
+// ========================================
 // Request DTOs
 // ========================================
 
@@ -38,13 +84,9 @@ export interface CreateUserDto {
   passwordHash: string;
 }
 
-export interface UpdateUserDto {
-  username?: string;
-  bio?: string;
-  location?: string;
-  photos?: string[];
-  tags?: string[];
-}
+export type UpdateUserDto = z.infer<typeof UpdateProfileSchema>;
+export type UpdateTagsDto = z.infer<typeof UpdateTagsSchema>;
+export type UpdatePhotosDto = z.infer<typeof UpdatePhotosSchema>;
 
 export interface GoogleUserDto {
   googleId: string;

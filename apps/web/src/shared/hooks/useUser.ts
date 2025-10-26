@@ -60,8 +60,33 @@ export function useUpdateUser() {
     mutationFn: async data => {
       return api.patch<User>('/users/me', data);
     },
+    // Optimistic update
+    onMutate: async newData => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: userKeys.current });
+
+      // Snapshot the previous value
+      const previousUser = queryClient.getQueryData<User>(userKeys.current);
+
+      // Optimistically update to the new value
+      if (previousUser) {
+        queryClient.setQueryData<User>(userKeys.current, {
+          ...previousUser,
+          ...newData,
+        });
+      }
+
+      // Return context object with previous data
+      return { previousUser };
+    },
+    onError: (_error, _variables, context) => {
+      // If error, roll back to previous value
+      if (context && typeof context === 'object' && 'previousUser' in context && context.previousUser) {
+        queryClient.setQueryData(userKeys.current, context.previousUser);
+      }
+    },
     onSuccess: () => {
-      // Invalidate current user query
+      // Invalidate to get fresh data
       queryClient.invalidateQueries({ queryKey: userKeys.current });
     },
   });

@@ -6,8 +6,18 @@ import {
 } from "../controllers/userController.js";
 import { getMatches } from "../controllers/matchController.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
+import rateLimit from "express-rate-limit";
 
 const router: ExpressRouter = Router();
+
+// Rate limiter for update profile endpoint (10 requests per minute per user)
+const updateProfileRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,
+  message: "Too many profile update requests, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Discover users (public endpoint)
 router.get("/discover", handleDiscoverUsers);
@@ -22,6 +32,6 @@ router.get("/me", getCurrentUser);
 router.get("/matches", getMatches);
 
 // Update current user profile
-router.patch("/me", updateCurrentUser);
+router.patch("/me", updateProfileRateLimit, updateCurrentUser);
 
 export default router;

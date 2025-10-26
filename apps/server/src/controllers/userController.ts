@@ -2,9 +2,8 @@ import type { Request, Response, NextFunction } from "express";
 import User from "../models/User.js";
 import type { IUser } from "../models/User.js";
 import type { UpdateUserDto, DiscoverUsersQuery } from "../dtos/user.dto.js";
+import { UpdateProfileSchema } from "../dtos/user.dto.js";
 import { discoverUsers as discoverUsersService } from "../services/userService.js";
-import { incrementalUpdateForUser } from "../services/userMatchService.js";
-import { Types } from "mongoose";
 
 /**
  * Get current user profile
@@ -21,6 +20,11 @@ export async function getCurrentUser(
     }
 
     const user = req.user as IUser;
+
+    // Log profile view audit
+    console.log(
+      `[Audit] profile_viewed by user ${user._id} at ${new Date().toISOString()}`
+    );
 
     res.json({
       _id: user._id,
@@ -45,8 +49,8 @@ export async function getCurrentUser(
  * Update current user profile
  */
 export async function updateCurrentUser(
-  req: Request<Record<string, never>, IUser, UpdateUserDto>,
-  res: Response<IUser | { error: string }>,
+  req: Request<Record<string, never>, unknown, UpdateUserDto>,
+  res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
@@ -56,24 +60,36 @@ export async function updateCurrentUser(
     }
 
     const user = req.user as IUser;
-    const { username, bio, location, photos, tags } = req.body;
+
+    // Validate request body with Zod
+    const validation = UpdateProfileSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({
+        error: "Validation failed",
+        details: validation.error.issues,
+      });
+      return;
+    }
+
+    const updateData = validation.data;
 
     // Build update object with only provided fields
-    const updateData: Partial<IUser> = {};
-
-    if (username !== undefined) updateData.username = username;
-    if (bio !== undefined) updateData.bio = bio;
-    if (location !== undefined) updateData.location = location;
-    if (photos !== undefined) updateData.photos = photos as any;
-    if (tags !== undefined) updateData.tags = tags as any;
-
-    // Track if tags changed
-    const tagsChanged = tags !== undefined;
+    const updateFields: Partial<IUser> = {};
+    if (updateData.username !== undefined)
+      updateFields.username = updateData.username;
+    if (updateData.bio !== undefined)
+      updateFields.bio = updateData.bio === "" ? undefined : updateData.bio;
+    if (updateData.location !== undefined)
+      updateFields.location =
+        updateData.location === "" ? undefined : updateData.location;
+    if (updateData.avatarUrl !== undefined)
+      updateFields.avatarUrl =
+        updateData.avatarUrl === "" ? undefined : updateData.avatarUrl;
 
     // Update user
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
-      { $set: updateData },
+      { $set: updateFields },
       { new: true, runValidators: true }
     );
 
@@ -82,23 +98,29 @@ export async function updateCurrentUser(
       return;
     }
 
-    // Trigger incremental match score update if tags changed
-    if (tagsChanged) {
-      try {
-        await incrementalUpdateForUser(user._id as Types.ObjectId);
-        console.log(
-          `[MatchScore] Incremental update triggered for user ${user._id}`
-        );
-      } catch (matchErr) {
-        console.error(
-          `[MatchScore] Error updating matches for user ${user._id}:`,
-          matchErr
-        );
-        // Don't fail the request if match update fails
-      }
-    }
+    // Log profile update audit
+    console.log(
+      `[Audit] profile_updated by user ${user._id} at ${new Date().toISOString()}`
+    );
+    console.log(
+      `[Audit] Updated fields: ${Object.keys(updateFields).join(", ")}`
+    );
 
-    res.json(updatedUser);
+    // Return lean projection for better performance
+    res.json({
+      _id: updatedUser._id,
+      email: updatedUser.emailLower,
+      username: updatedUser.username,
+      avatarUrl: updatedUser.avatarUrl,
+      bio: updatedUser.bio,
+      location: updatedUser.location,
+      photos: updatedUser.photos,
+      tags: updatedUser.tags,
+      isOnline: updatedUser.isOnline,
+      lastVisitAt: updatedUser.lastVisitAt,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+    });
   } catch (err) {
     next(err);
   }
