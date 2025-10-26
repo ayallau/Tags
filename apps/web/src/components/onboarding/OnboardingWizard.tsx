@@ -143,6 +143,7 @@ export function OnboardingWizard() {
       // Prepare user data (filter out undefined values)
       const updateData: Record<string, unknown> = {
         tags: selectedTags.map(t => t._id),
+        isOnboardingComplete: true,
       };
 
       if (profileInfo.bio) updateData['bio'] = profileInfo.bio;

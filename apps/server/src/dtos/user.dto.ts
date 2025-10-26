@@ -35,8 +35,7 @@ export function toUserDto(user: IUser): UserDto {
 // ========================================
 
 /**
- * Schema for updating user profile (bio, location, avatarUrl)
- * Tags are managed separately via TagManagement
+ * Schema for updating user profile (bio, location, avatarUrl, tags)
  */
 export const UpdateProfileSchema = z.object({
   username: z
@@ -59,6 +58,8 @@ export const UpdateProfileSchema = z.object({
     .optional()
     .or(z.literal("")),
   avatarUrl: z.string().url("Invalid URL format").or(z.literal("")).optional(),
+  tags: z.array(z.string()).max(20, "Cannot have more than 20 tags").optional(),
+  isOnboardingComplete: z.boolean().optional(),
 });
 
 /**

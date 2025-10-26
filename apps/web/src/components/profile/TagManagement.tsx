@@ -11,7 +11,7 @@ import type { Tag } from '../../shared/types/tag';
 import { useUpdateUser } from '../../shared/hooks/useUser';
 
 interface TagManagementProps {
-  currentTagIds?: string[];
+  currentTagIds?: string[] | Array<{ _id: string; [key: string]: unknown }>;
   className?: string;
 }
 
@@ -19,13 +19,17 @@ export function TagManagement({ currentTagIds = [], className = '' }: TagManagem
   const { data: allTagsData } = useListTags({ limit: 100 });
   const allTags = allTagsData?.tags || [];
 
+  // Normalize tag IDs - extract _id if it's an object
+  const normalizedTagIds = currentTagIds.map(id => (typeof id === 'string' ? id : id._id));
+
   // Map tag IDs to Tag objects
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(currentTagIds);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(normalizedTagIds);
   const selectedTags = allTags.filter(tag => selectedTagIds.includes(tag._id));
 
   // Sync with prop changes
   useEffect(() => {
-    setSelectedTagIds(currentTagIds);
+    const normalized = currentTagIds.map(id => (typeof id === 'string' ? id : id._id));
+    setSelectedTagIds(normalized);
   }, [currentTagIds]);
 
   const updateMutation = useUpdateUser();

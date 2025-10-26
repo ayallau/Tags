@@ -34,6 +34,9 @@ export async function getCurrentUser(
       `[Audit] profile_viewed by user ${user._id} at ${new Date().toISOString()}`
     );
 
+    // Populate tags if not already populated
+    const populatedUser = await User.findById(user._id).populate("tags");
+
     res.json({
       _id: user._id,
       email: user.emailLower,
@@ -42,7 +45,12 @@ export async function getCurrentUser(
       bio: user.bio,
       location: user.location,
       photos: user.photos,
-      tags: user.tags,
+      tags:
+        (populatedUser?.tags as any[])?.map((tag) => ({
+          _id: String(tag._id),
+          slug: tag.slug,
+          label: tag.label,
+        })) || [],
       isOnline: user.isOnline,
       lastVisitAt: user.lastVisitAt,
       isOnboardingComplete: user.isOnboardingComplete || false,
@@ -94,13 +102,21 @@ export async function updateCurrentUser(
     if (updateData.avatarUrl !== undefined)
       updateFields.avatarUrl =
         updateData.avatarUrl === "" ? undefined : updateData.avatarUrl;
+    if (updateData.tags !== undefined) {
+      // Convert tag IDs to ObjectIds
+      updateFields.tags = updateData.tags.map(
+        (tagId) => new Types.ObjectId(tagId)
+      );
+    }
+    if (updateData.isOnboardingComplete !== undefined)
+      updateFields.isOnboardingComplete = updateData.isOnboardingComplete;
 
     // Update user
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
       { $set: updateFields },
       { new: true, runValidators: true }
-    );
+    ).populate("tags");
 
     if (!updatedUser) {
       res.status(404).json({ error: "User not found" });
@@ -124,7 +140,11 @@ export async function updateCurrentUser(
       bio: updatedUser.bio,
       location: updatedUser.location,
       photos: updatedUser.photos,
-      tags: updatedUser.tags,
+      tags: (updatedUser.tags as any[]).map((tag) => ({
+        _id: String(tag._id),
+        slug: tag.slug,
+        label: tag.label,
+      })),
       isOnline: updatedUser.isOnline,
       lastVisitAt: updatedUser.lastVisitAt,
       isOnboardingComplete: updatedUser.isOnboardingComplete || false,
