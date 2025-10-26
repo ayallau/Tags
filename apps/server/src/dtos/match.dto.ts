@@ -6,7 +6,7 @@
 export interface GetMatchesQuery {
   cursor?: string; // Cursor for pagination
   limit?: number; // Number of results (default: 24)
-  sort?: "score" | "sharedCount" | "name"; // Sort order (default: score)
+  sort?: "score" | "sharedCount" | "name" | "online" | "lastVisit"; // Sort order (default: score)
 }
 
 /**

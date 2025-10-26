@@ -36,25 +36,35 @@ export async function getMatches(
 
     // Cursor-based pagination
     if (cursor) {
-      // Parse cursor (format: score_userId_targetUserId)
+      // Parse cursor (format: sortKey_userId_targetUserId)
       const parts = cursor.split("_");
       if (parts.length === 3) {
-        const cursorScore = parseFloat(parts[0]);
+        const cursorValue = parts[0];
         const cursorTargetUserId = parts[2];
 
-        if (sort === "score") {
+        if (sort === "score" || sort === "sharedCount") {
+          const numericValue = parseFloat(cursorValue);
           matchQuery.$or = [
-            { score: { $lt: cursorScore } },
             {
-              score: cursorScore,
+              [sort === "score" ? "score" : "sharedTagsCount"]: {
+                $lt: numericValue,
+              },
+            },
+            {
+              [sort === "score" ? "score" : "sharedTagsCount"]: numericValue,
               targetUserId: { $lt: new Types.ObjectId(cursorTargetUserId) },
             },
           ];
+        } else {
+          // For name/online/lastVisit, we'll sort after fetching, so cursor is not supported yet
+          // Return empty result on cursor with these sorts to prevent pagination issues
+          matchQuery._id = null; // This will return no results
         }
       }
     }
 
-    // Sort options
+    // Sort options for match scores
+    // Note: "online", "lastVisit", and "name" require manual sorting after fetching users
     let sortOptions: Record<string, 1 | -1> = {};
     switch (sort) {
       case "score":
@@ -63,6 +73,8 @@ export async function getMatches(
       case "sharedCount":
         sortOptions = { sharedTagsCount: -1, score: -1, targetUserId: 1 };
         break;
+      case "online":
+      case "lastVisit":
       case "name":
         // Will be sorted after populating user data
         sortOptions = { score: -1, targetUserId: 1 };
@@ -119,7 +131,7 @@ export async function getMatches(
       })
       .filter((match) => match !== null);
 
-    // Sort by name if requested
+    // Sort matches by requested criteria
     let finalMatches = matches;
     if (sort === "name") {
       finalMatches = [...matches].sort((a, b) => {
@@ -127,13 +139,54 @@ export async function getMatches(
         const nameB = (b?.targetUser.username || "").toLowerCase();
         return nameA.localeCompare(nameB);
       });
+    } else if (sort === "online") {
+      finalMatches = [...matches].sort((a, b) => {
+        // Online users first (true before false)
+        if (a?.targetUser.isOnline !== b?.targetUser.isOnline) {
+          return a?.targetUser.isOnline ? -1 : 1;
+        }
+        // If both online or both offline, sort by score desc
+        return (b?.score || 0) - (a?.score || 0);
+      });
+    } else if (sort === "lastVisit") {
+      finalMatches = [...matches].sort((a, b) => {
+        const dateA = a?.targetUser.lastVisitAt
+          ? new Date(a.targetUser.lastVisitAt).getTime()
+          : 0;
+        const dateB = b?.targetUser.lastVisitAt
+          ? new Date(b.targetUser.lastVisitAt).getTime()
+          : 0;
+        // Most recent first (desc)
+        return dateB - dateA;
+      });
     }
 
     // Generate next cursor
     let nextCursor: string | undefined;
     if (hasMore && results.length > 0) {
       const lastMatch = results[results.length - 1];
-      nextCursor = `${lastMatch.score}_${String(user._id)}_${String(lastMatch.targetUserId)}`;
+
+      // Generate cursor based on sort type
+      let cursorValue: string | number;
+      switch (sort) {
+        case "score":
+          cursorValue = lastMatch.score;
+          break;
+        case "sharedCount":
+          cursorValue = lastMatch.sharedTagsCount;
+          break;
+        case "name":
+        case "online":
+        case "lastVisit":
+          // These require post-processing sort, cursor not fully supported
+          // Use score as fallback
+          cursorValue = lastMatch.score;
+          break;
+        default:
+          cursorValue = lastMatch.score;
+      }
+
+      nextCursor = `${cursorValue}_${String(user._id)}_${String(lastMatch.targetUserId)}`;
     }
 
     // Return response
