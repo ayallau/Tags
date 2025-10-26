@@ -4,8 +4,7 @@ import type {
   Register, 
   AuthResponse, 
   PasswordResetRequest, 
-  PasswordReset,
-  RefreshToken 
+  PasswordReset
 } from '../../models/dist/auth.js';
 import type { User, UpdateUser } from '../../models/dist/user.js';
 import type { Tag, CreateTag, UpdateTag, TagFilter } from '../../models/dist/tag.js';
@@ -27,8 +26,9 @@ export class AuthApi {
     return this.client.post('/auth/logout');
   }
 
-  async refreshToken(refreshToken: RefreshToken): Promise<ApiResponse<AuthResponse>> {
-    return this.client.post('/auth/refresh', refreshToken);
+  async refreshToken(): Promise<ApiResponse<AuthResponse>> {
+    // Refresh token is automatically sent via HttpOnly cookie
+    return this.client.post('/auth/refresh', {});
   }
 
   async requestPasswordReset(data: PasswordResetRequest): Promise<ApiResponse<void>> {

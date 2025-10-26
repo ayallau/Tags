@@ -42,18 +42,7 @@ export const RefreshTokenSchema = z.object({
 
 // Auth response schema
 export const AuthResponseSchema = z.object({
-  user: z.object({
-    _id: z.string(),
-    email: z.string().email(),
-    username: z.string(),
-    firstName: z.string(),
-    lastName: z.string(),
-    avatar: z.string().optional(),
-    isEmailVerified: z.boolean(),
-  }),
   accessToken: z.string(),
-  refreshToken: z.string(),
-  expiresIn: z.number(),
 });
 
 // Types

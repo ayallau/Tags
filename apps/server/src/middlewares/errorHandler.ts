@@ -34,7 +34,7 @@ export const errorHandler = (
   err: unknown,
   req: Request,
   res: Response<ErrorResponse>,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   const requestId = getRequestId(req);
 
@@ -137,7 +137,7 @@ export const errorHandler = (
 export const notFoundHandler = (
   req: Request,
   res: Response<ErrorResponse>,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   const requestId = generateRequestId();
 

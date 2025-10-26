@@ -17,60 +17,12 @@ export interface TokenStorage {
   getAccessToken(): string | null;
   setAccessToken(token: string): void;
   removeAccessToken(): void;
-  getRefreshToken(): string | null;
-  setRefreshToken(token: string): void;
-  removeRefreshToken(): void;
 }
 
-// Cookie utility functions
-function setCookie(
-  name: string,
-  value: string,
-  options: {
-    secure?: boolean;
-    sameSite?: "strict" | "lax" | "none";
-    maxAge?: number;
-    path?: string;
-  } = {}
-): void {
-  if (typeof document === "undefined") return;
-
-  const {
-    secure = true,
-    sameSite = "strict",
-    maxAge = 7 * 24 * 60 * 60, // 7 days default
-    path = "/",
-  } = options;
-
-  let cookieString = `${name}=${value}; Path=${path}; Max-Age=${maxAge}; SameSite=${sameSite}`;
-
-  if (secure) {
-    cookieString += "; Secure";
-  }
-
-  document.cookie = cookieString;
-}
-
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    return parts.pop()?.split(";").shift() || null;
-  }
-  return null;
-}
-
-function deleteCookie(name: string, path: string = "/"): void {
-  if (typeof document === "undefined") return;
-  document.cookie = `${name}=; Path=${path}; Max-Age=0`;
-}
-
-// Default token storage using localStorage for access token and cookies for refresh token
+// Default token storage using localStorage for access token only
+// Refresh token is managed by server via HttpOnly cookies
 class LocalTokenStorage implements TokenStorage {
   private readonly ACCESS_TOKEN_KEY = "tags_access_token";
-  private readonly REFRESH_TOKEN_KEY = "tags_refresh_token";
 
   getAccessToken(): string | null {
     if (typeof window === "undefined") return null;
@@ -85,23 +37,6 @@ class LocalTokenStorage implements TokenStorage {
   removeAccessToken(): void {
     if (typeof window === "undefined") return;
     window.localStorage.removeItem(this.ACCESS_TOKEN_KEY);
-  }
-
-  getRefreshToken(): string | null {
-    return getCookie(this.REFRESH_TOKEN_KEY);
-  }
-
-  setRefreshToken(token: string): void {
-    setCookie(this.REFRESH_TOKEN_KEY, token, {
-      secure: true,
-      sameSite: "strict",
-      maxAge: 30 * 24 * 60 * 60, // 30 days
-      path: "/",
-    });
-  }
-
-  removeRefreshToken(): void {
-    deleteCookie(this.REFRESH_TOKEN_KEY);
   }
 }
 
@@ -186,18 +121,19 @@ export class ApiClient {
 
   private async performTokenRefresh(): Promise<string> {
     try {
+      // Server reads refresh token from HttpOnly cookie automatically
       const response = await axios.post(
         `${this.client.defaults.baseURL}/auth/refresh`,
         {},
         {
-          withCredentials: true, // Include cookies in request
+          withCredentials: true, // Include HttpOnly cookie automatically
         }
       );
 
       const { accessToken } = response.data;
 
       this.tokenStorage.setAccessToken(accessToken);
-      // Refresh token is automatically updated in cookie by server
+      // Server updates refresh token cookie automatically
 
       return accessToken;
     } catch (error) {
@@ -208,7 +144,6 @@ export class ApiClient {
 
   private clearTokens(): void {
     this.tokenStorage.removeAccessToken();
-    this.tokenStorage.removeRefreshToken();
   }
 
   private handleAuthError(): void {
@@ -281,9 +216,8 @@ export class ApiClient {
   }
 
   // Auth methods
-  setTokens(accessToken: string, refreshToken: string): void {
+  setAccessToken(accessToken: string): void {
     this.tokenStorage.setAccessToken(accessToken);
-    this.tokenStorage.setRefreshToken(refreshToken);
   }
 
   clearAuth(): void {

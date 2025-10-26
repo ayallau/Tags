@@ -29,7 +29,6 @@ export interface ResetPasswordDto {
 
 export interface AuthResponseDto {
   accessToken: string;
-  refreshToken?: string;
 }
 
 export interface MessageResponseDto {

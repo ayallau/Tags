@@ -92,8 +92,7 @@ export function loginWithProvider(
   provider: string
 ): AuthResponseDto {
   const accessToken = createAccessToken(user, provider);
-  const refreshToken = createRefreshToken(user);
-  return { accessToken, refreshToken };
+  return { accessToken };
 }
 
 /**
@@ -244,29 +243,31 @@ export async function resetPassword(
 }
 
 /**
- * Simple logout - instructs client to delete token
- * TODO: In the future - add refresh token deletion from cookies
+ * Simple logout - deletes refresh token cookie and bumps token version
  */
-export function logout(
+export async function logout(
   req: Request,
   res: Response<MessageResponseDto>,
   next: NextFunction
-): void {
+): Promise<void> {
   try {
-    console.log(
-      `[${new Date().toISOString()}] User logged out - IP: ${req.ip || "unknown"}`
-    );
+    // Clear refresh token from cookies
+    res.clearCookie("tags_refresh_token", getAuthClearCookieOptionsAuto());
 
-    // TODO: כאשר יוגדרו refresh tokens בעוגיות, הוסף:
-    // res.clearCookie('refreshToken', {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'strict'
-    // });
+    // If user is authenticated, invalidate their tokens
+    if (req.user) {
+      await (req.user as IUser).updateOne({
+        $inc: { tokenVersion: 1 },
+      });
+
+      console.log(
+        `[${new Date().toISOString()}] User logged out - tokenVersion incremented for user ${String(req.user._id)}`
+      );
+    }
 
     res.json({
       message: "Logged out successfully",
-      action: "clearToken", // הנחיה לצד הלקוח למחוק את accessToken מ-localStorage
+      action: "clearToken", // Instruct client to delete accessToken from localStorage
     });
   } catch (err) {
     console.error(`[${new Date().toISOString()}] Error in logout:`, err);
@@ -275,7 +276,7 @@ export function logout(
 }
 
 /**
- * Refresh access token using refresh token from cookie
+ * Refresh access token using refresh token from cookie with token rotation
  */
 export async function refreshToken(
   req: Request,
@@ -303,9 +304,21 @@ export async function refreshToken(
       return res.status(401).json({ error: "Token revoked due to logout" });
     }
 
-    // Create new tokens
-    const newAccessToken = createAccessToken(user, "refresh");
-    const newRefreshToken = createRefreshToken(user);
+    // Token rotation: increment tokenVersion before creating new tokens
+    // This invalidates the old refresh token
+    await user.updateOne({
+      $inc: { tokenVersion: 1 },
+    });
+
+    // Reload user to get updated tokenVersion
+    const updatedUser = await User.findById(user._id);
+    if (!updatedUser) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    // Create new tokens with updated tokenVersion
+    const newAccessToken = createAccessToken(updatedUser, "refresh");
+    const newRefreshToken = createRefreshToken(updatedUser);
 
     // Update refresh token in cookie
     res.cookie(

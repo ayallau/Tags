@@ -8,7 +8,6 @@ import passport from "passport";
 import {
   loginWithEmail,
   registerWithEmail,
-  loginWithProvider,
   forgotPassword,
   resetPassword,
   refreshToken,
@@ -16,6 +15,7 @@ import {
   globalLogout,
 } from "../controllers/authController.js";
 import { getAuthCookieOptionsAuto } from "../lib/cookies.js";
+import { createAccessToken, createRefreshToken } from "../services/tokenService.js";
 
 const router: Router = Router();
 
@@ -111,18 +111,17 @@ router.get(
       if (!req.user) {
         return res.status(401).json({ error: "Authentication failed" });
       }
-      const result = loginWithProvider(req.user, "google");
+      const accessToken = createAccessToken(req.user, "google");
+      const refreshToken = createRefreshToken(req.user);
 
       // Set refresh token in HttpOnly cookie
-      if (result.refreshToken) {
-        res.cookie(
-          "tags_refresh_token",
-          result.refreshToken,
-          getAuthCookieOptionsAuto()
-        );
-      }
+      res.cookie(
+        "tags_refresh_token",
+        refreshToken,
+        getAuthCookieOptionsAuto()
+      );
 
-      res.json({ accessToken: result.accessToken });
+      res.json({ accessToken });
     } catch (err) {
       next(err);
     }
