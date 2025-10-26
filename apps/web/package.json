@@ -33,6 +33,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@tags/eslint-config": "workspace:*",
     "@eslint/js": "^9.36.0",
     "@tailwindcss/postcss": "^4.1.14",
     "@types/node": "^24.6.0",

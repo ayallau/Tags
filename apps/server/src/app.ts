@@ -15,6 +15,7 @@ import swaggerUi from "swagger-ui-express";
 import https from "node:https";
 import fs from "node:fs";
 import { readFileSync } from "node:fs";
+import type { BufferEncoding } from "node:buffer";
 import logger from "./lib/logger.js";
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
 import helmet from "helmet";
