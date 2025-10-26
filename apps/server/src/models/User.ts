@@ -39,6 +39,7 @@ const userSchema = new mongoose.Schema(
     // Status fields
     isOnline: { type: Boolean, default: false, index: true },
     lastVisitAt: { type: Date, required: false, index: true },
+    isOnboardingComplete: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }
 );
@@ -70,6 +71,7 @@ export interface IUser extends Document {
   // Status fields
   isOnline: boolean;
   lastVisitAt?: Date;
+  isOnboardingComplete: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

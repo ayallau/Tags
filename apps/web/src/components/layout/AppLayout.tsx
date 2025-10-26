@@ -1,9 +1,17 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { OnboardingBanner } from '../auth/OnboardingBanner';
+import { useAuthStore } from '../../state/authStore';
 
 export function AppLayout() {
+  const location = useLocation();
+  const { isAuthenticated } = useAuthStore();
+
+  // Don't show Navbar on welcome page
+  const showNavbar = location.pathname !== '/welcome';
+
   return (
     <div className='min-h-dvh flex flex-col'>
       {/* Skip to content link */}
@@ -15,7 +23,10 @@ export function AppLayout() {
       </a>
 
       <Header />
-      <Navbar />
+      {showNavbar && <Navbar />}
+
+      {/* Onboarding Banner */}
+      {isAuthenticated() && <OnboardingBanner />}
 
       <main id='main-content' className='flex-1 container mx-auto px-4 py-6 max-w-7xl'>
         <Outlet />

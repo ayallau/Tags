@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { PageSkeleton } from './components/skeletons';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { PublicOnlyRoute } from './components/auth/PublicOnlyRoute';
 import {
   HomePage,
   DiscoverPage,
@@ -12,6 +14,8 @@ import {
   ProfilePage,
   SettingsPage,
   OnboardingPage,
+  WelcomePage,
+  ResetPasswordPage,
 } from './routes';
 import './App.css';
 
@@ -20,6 +24,29 @@ function App() {
     <Router>
       <Routes>
         <Route path='/' element={<AppLayout />}>
+          {/* Public routes */}
+          <Route
+            path='welcome'
+            element={
+              <PublicOnlyRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <WelcomePage />
+                </Suspense>
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path='reset'
+            element={
+              <PublicOnlyRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <ResetPasswordPage />
+                </Suspense>
+              </PublicOnlyRoute>
+            }
+          />
+
+          {/* Root redirect - show welcome for guests, discover for users */}
           <Route
             index
             element={
@@ -28,68 +55,88 @@ function App() {
               </Suspense>
             }
           />
+
+          {/* Protected onboarding */}
           <Route
             path='onboarding'
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <OnboardingPage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <OnboardingPage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
+
+          {/* Protected pages */}
           <Route
             path='discover'
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <DiscoverPage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <DiscoverPage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
           <Route
             path='matches'
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <MatchesPage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <MatchesPage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
           <Route
             path='bookmarks'
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <BookmarksPage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <BookmarksPage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
           <Route
             path='friends'
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <FriendsPage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <FriendsPage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
           <Route
             path='chat'
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <ChatPage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <ChatPage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
           <Route
             path='profile'
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <ProfilePage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <ProfilePage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
           <Route
             path='settings'
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <SettingsPage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <SettingsPage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
         </Route>

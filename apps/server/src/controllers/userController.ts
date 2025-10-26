@@ -38,6 +38,7 @@ export async function getCurrentUser(
       tags: user.tags,
       isOnline: user.isOnline,
       lastVisitAt: user.lastVisitAt,
+      isOnboardingComplete: user.isOnboardingComplete || false,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -119,6 +120,7 @@ export async function updateCurrentUser(
       tags: updatedUser.tags,
       isOnline: updatedUser.isOnline,
       lastVisitAt: updatedUser.lastVisitAt,
+      isOnboardingComplete: updatedUser.isOnboardingComplete || false,
       createdAt: updatedUser.createdAt,
       updatedAt: updatedUser.updatedAt,
     });

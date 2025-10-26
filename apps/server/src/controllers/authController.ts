@@ -71,15 +71,14 @@ export async function registerWithEmail(
     const passwordHash = await hashPassword(password);
     const newUser = await createUser({ email, passwordHash });
     const accessToken = createAccessToken(newUser, "email");
+    const refreshToken = createRefreshToken(newUser);
 
-    // TODO: In the future - add refresh token creation and sending in cookies:
-    // const refreshToken = createRefreshToken(newUser);
-    // res.cookie('refreshToken', refreshToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'strict',
-    //   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    // });
+    // Set refresh token in HttpOnly cookie
+    res.cookie("tags_refresh_token", refreshToken, getAuthCookieOptionsAuto());
+
+    console.log(
+      `[${new Date().toISOString()}] User registered successfully - email: ${email}`
+    );
 
     res.status(201).json({ accessToken });
   } catch (err) {
