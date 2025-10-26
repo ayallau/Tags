@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // Lazy-loaded page components
 export const WelcomePage = lazy(() => import('../pages/WelcomePage'));
 export const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
+export const OAuthCallbackPage = lazy(() => import('../pages/OAuthCallbackPage'));
 export const HomePage = lazy(() => import('../pages/HomePage'));
 export const DiscoverPage = lazy(() => import('../pages/DiscoverPage'));
 export const MatchesPage = lazy(() => import('../pages/MatchesPage'));

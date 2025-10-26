@@ -15,7 +15,11 @@ import {
   globalLogout,
 } from "../controllers/authController.js";
 import { getAuthCookieOptionsAuto } from "../lib/cookies.js";
-import { createAccessToken, createRefreshToken } from "../services/tokenService.js";
+import {
+  createAccessToken,
+  createRefreshToken,
+} from "../services/tokenService.js";
+import config from "../config.js";
 
 const router: Router = Router();
 
@@ -105,7 +109,7 @@ router.get(
     session: false,
     failureRedirect: "/auth/google/failure",
   }),
-  (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     console.log(`[${new Date().toISOString()}] User Details:`, req.user);
     try {
       if (!req.user) {
@@ -121,7 +125,11 @@ router.get(
         getAuthCookieOptionsAuto()
       );
 
-      res.json({ accessToken });
+      // Redirect to client with access token in URL
+      // Client will handle saving the token
+      const redirectUrl = `${config.CLIENT_URL}/oauth/callback?token=${encodeURIComponent(accessToken)}`;
+
+      res.redirect(redirectUrl);
     } catch (err) {
       next(err);
     }

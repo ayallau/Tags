@@ -24,11 +24,39 @@ export async function createUser(userData: CreateUserDto): Promise<IUser> {
 export async function upsertGoogleUser({
   googleId,
   email,
+  displayName,
+  avatarUrl,
 }: GoogleUserDto): Promise<IUser> {
   // Search for existing user by Google ID
   let user = await User.findOne({ "providers.google.id": googleId });
 
   if (user) {
+    // Update profile fields if they changed
+    const updates: Record<string, any> = {};
+
+    if (email && !user.emailLower) {
+      updates.emailLower = email.toLowerCase();
+    }
+
+    if (avatarUrl && !user.avatarUrl) {
+      updates.avatarUrl = avatarUrl;
+    }
+
+    if (displayName && !user.username) {
+      // Generate username from displayName (remove spaces, special chars)
+      const cleanName = displayName.replace(/[^a-zA-Z0-9_-]/g, "_");
+      // Check if username is already taken
+      const existingUser = await User.findOne({ username: cleanName });
+      if (!existingUser) {
+        updates.username = cleanName;
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await user.updateOne(updates);
+      await user.save();
+    }
+
     return user;
   }
 
@@ -42,14 +70,42 @@ export async function upsertGoogleUser({
         user.providers = {};
       }
       user.providers.google = { id: googleId, email };
+
+      // Update profile fields if needed
+      if (avatarUrl && !user.avatarUrl) {
+        user.avatarUrl = avatarUrl;
+      }
+
+      if (displayName && !user.username) {
+        const cleanName = displayName.replace(/[^a-zA-Z0-9_-]/g, "_");
+        const existingUser = await User.findOne({ username: cleanName });
+        if (!existingUser) {
+          user.username = cleanName;
+        }
+      }
+
       await user.save();
       return user;
     }
   }
 
   // Create new user
+  const emailLower = email?.toLowerCase() || null;
+
+  // Generate username from displayName if available
+  let username: string | undefined;
+  if (displayName) {
+    const cleanName = displayName.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const existingUser = await User.findOne({ username: cleanName });
+    if (!existingUser) {
+      username = cleanName;
+    }
+  }
+
   const newUser = new User({
-    emailLower: email?.toLowerCase() || null,
+    emailLower,
+    username,
+    avatarUrl: avatarUrl || undefined,
     providers: {
       google: { id: googleId, email },
     },

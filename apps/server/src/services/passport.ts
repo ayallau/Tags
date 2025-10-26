@@ -1,5 +1,9 @@
 import passport from "passport";
-import { Strategy as GoogleStrategy, type Profile, type VerifyCallback } from "passport-google-oauth20";
+import {
+  Strategy as GoogleStrategy,
+  type Profile,
+  type VerifyCallback,
+} from "passport-google-oauth20";
 import config from "../config.js";
 import { upsertGoogleUser } from "./userService.js";
 
@@ -21,12 +25,21 @@ passport.use(
       try {
         const googleId = profile.id;
         const email = profile.emails?.[0]?.value || null;
-        const user = await upsertGoogleUser({ googleId, email });
+        const displayName =
+          profile.displayName || profile.name?.givenName || null;
+        const avatarUrl = profile.photos?.[0]?.value || null;
+
+        const user = await upsertGoogleUser({
+          googleId,
+          email,
+          displayName,
+          avatarUrl,
+        });
         return done(null, user);
       } catch (err) {
         return done(err as Error);
       }
-    },
-  ),
+    }
+  )
 );
 export default passport;

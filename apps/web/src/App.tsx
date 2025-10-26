@@ -17,6 +17,7 @@ import {
   OnboardingPage,
   WelcomePage,
   ResetPasswordPage,
+  OAuthCallbackPage,
 } from './routes';
 import './App.css';
 
@@ -44,6 +45,14 @@ function App() {
                   <ResetPasswordPage />
                 </Suspense>
               </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path='oauth/callback'
+            element={
+              <Suspense fallback={<PageSkeleton />}>
+                <OAuthCallbackPage />
+              </Suspense>
             }
           />
 

@@ -92,6 +92,8 @@ export type UpdatePhotosDto = z.infer<typeof UpdatePhotosSchema>;
 export interface GoogleUserDto {
   googleId: string;
   email: string | null;
+  displayName?: string | null;
+  avatarUrl?: string | null;
 }
 
 // Discover users query DTO
