@@ -21,11 +21,13 @@ export interface AppConfig {
   readonly SSL_CERT_PATH: string;
   readonly SSL_KEY_PATH: string;
   readonly SSL_ENABLED: boolean;
-  readonly PROTOCOL: 'http' | 'https';
+  readonly PROTOCOL: "http" | "https";
 }
 
-// Determine protocol based on environment variable
-const isHttps = process.env.SERVER_PROTOCOL === 'https' || process.env.SSL_ENABLED === 'true';
+// Single source of truth for SSL - only SSL_ENABLED determines protocol
+const isHttps = process.env.SSL_ENABLED === "true";
+// Support deprecated SERVER_PROTOCOL for backwards compatibility
+const isHttpsLegacy = process.env.SERVER_PROTOCOL === "https";
 
 const config: AppConfig = {
   // Secrets
@@ -37,27 +39,32 @@ const config: AppConfig = {
   PASSWORD_PEPPER: process.env.PASSWORD_PEPPER ?? "",
   COOKIE_KEY: process.env.COOKIE_KEY ?? "",
 
-  // Config
+  // Config - ports are constants
   PORT_HTTP: 3001,
   PORT_HTTPS: 3443,
   get PORT() {
-    return isHttps ? this.PORT_HTTPS : this.PORT_HTTP;
+    return isHttps || isHttpsLegacy ? this.PORT_HTTPS : this.PORT_HTTP;
   },
 
-  BCRYPT_ROUNDS: 12,
+  // Non-secret config - can be overridden via env if needed
+  BCRYPT_ROUNDS: Number(process.env.BCRYPT_ROUNDS) || 12,
 
   // Dynamic client URLs based on protocol
   get CLIENT_ORIGIN() {
-    return isHttps ? "https://localhost:5174" : "http://localhost:5173";
+    return isHttps || isHttpsLegacy
+      ? "https://localhost:5174"
+      : "http://localhost:5173";
   },
   get CLIENT_URL() {
-    return isHttps ? "https://localhost:5174" : "http://localhost:5173";
+    return isHttps || isHttpsLegacy
+      ? "https://localhost:5174"
+      : "http://localhost:5173";
   },
 
   SSL_CERT_PATH: path.resolve("certs/server.crt"),
   SSL_KEY_PATH: path.resolve("certs/server.key"),
-  SSL_ENABLED: isHttps,
-  PROTOCOL: isHttps ? 'https' : 'http',
+  SSL_ENABLED: isHttps || isHttpsLegacy,
+  PROTOCOL: isHttps || isHttpsLegacy ? "https" : "http",
 } as const;
 
 export default config;

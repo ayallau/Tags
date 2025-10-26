@@ -1,17 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
+    port: process.env['VITE_HTTPS'] === 'true' ? 5174 : 5173,
     host: 'localhost',
     // Support for HTTPS development
     ...(process.env['VITE_HTTPS'] === 'true' && {
       https: {
-        key: '../../apps/server/certs/server.key',
-        cert: '../../apps/server/certs/server.crt',
+        key: fs.readFileSync(path.resolve('../server/certs/server.key')),
+        cert: fs.readFileSync(path.resolve('../server/certs/server.crt')),
       },
     }),
   },

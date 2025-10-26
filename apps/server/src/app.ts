@@ -17,6 +17,7 @@ import fs from "node:fs";
 import { readFileSync } from "node:fs";
 import logger from "./lib/logger.js";
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
+import helmet from "helmet";
 
 // Get __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -47,7 +48,28 @@ try {
 
 const app = express();
 
-// Request ID middleware (must be first)
+// Security headers - Helmet
+if (config.SSL_ENABLED) {
+  // HTTPS mode - enable strict security
+  app.use(
+    helmet({
+      hsts: {
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true,
+        preload: true,
+      },
+    })
+  );
+} else {
+  // HTTP mode - basic security
+  app.use(
+    helmet({
+      hsts: false, // Disable HSTS on HTTP
+    })
+  );
+}
+
+// Request ID middleware (must be first after security)
 app.use(
   (req: Request & { requestId?: string; startTime?: number }, _res, next) => {
     req.requestId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -73,6 +95,9 @@ const corsOptions: CorsOptions = {
   origin: config.CLIENT_ORIGIN,
   credentials: true,
   optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Content-Type", "Authorization"],
 };
 
 // Middleware
