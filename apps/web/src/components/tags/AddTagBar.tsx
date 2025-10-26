@@ -13,6 +13,7 @@ interface AddTagBarProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  allowCreate?: boolean; // Allow creating new tags
 }
 
 export function AddTagBar({
@@ -21,6 +22,7 @@ export function AddTagBar({
   placeholder = 'Add tags...',
   disabled = false,
   className = '',
+  allowCreate = true,
 }: AddTagBarProps) {
   const handleSelect = (tag: Tag) => {
     if (!selectedTags.some(t => t._id === tag._id)) {
@@ -34,7 +36,13 @@ export function AddTagBar({
 
   return (
     <div className={`space-y-3 ${className}`}>
-      <TagPicker onSelect={handleSelect} selectedTags={selectedTags} placeholder={placeholder} disabled={disabled} />
+      <TagPicker
+        onSelect={handleSelect}
+        selectedTags={selectedTags}
+        placeholder={placeholder}
+        disabled={disabled}
+        allowCreate={allowCreate}
+      />
 
       {selectedTags.length > 0 && (
         <div className='flex flex-wrap gap-2' role='list' aria-label='Selected tags'>

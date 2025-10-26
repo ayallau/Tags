@@ -55,6 +55,7 @@ export function SelectTagsStep({ selectedTags, onSelectTag, onRemoveTag, onNext,
             selectedTags={selectedTags}
             placeholder='Search for tags (e.g., "photography", "coding")...'
             className='w-full'
+            allowCreate={true}
           />
         </div>
 
