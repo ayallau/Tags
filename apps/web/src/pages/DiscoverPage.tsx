@@ -1,112 +1,187 @@
-import { useState } from 'react';
-import { DataState } from '../components/data';
-import { Button } from '../components/ui/button';
+/**
+ * Discover Page
+ * Allows users to discover other users based on tags, search, and sorting
+ */
 
-type DataStatus = 'idle' | 'loading' | 'empty' | 'error' | 'success';
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Grid3x3, List as ListIcon } from 'lucide-react';
+import { AddTagBar } from '../components/tags/AddTagBar';
+import { UsersList } from '../components/users/UsersList';
+import { Button } from '../components/ui/button';
+import { useDiscoverUsers } from '../shared/hooks/useDiscoverUsers';
+import { useListTags } from '../shared/hooks/useTags';
+import type { Tag } from '../shared/types/tag';
+import type { DiscoverUsersParams } from '../shared/types/user';
 
 export default function DiscoverPage() {
-  const [dataStatus, setDataStatus] = useState<DataStatus>('success');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  const handleStatusChange = (status: DataStatus) => {
-    setDataStatus(status);
+  // Get URL params
+  const selectedTagIds = searchParams.get('tags')?.split(',').filter(Boolean) || [];
+  const searchQuery = searchParams.get('query') || '';
+  const sortParam = searchParams.get('sort');
+  const sortBy: DiscoverUsersParams['sort'] =
+    sortParam && ['relevance', 'online', 'lastVisit', 'name'].includes(sortParam)
+      ? (sortParam as DiscoverUsersParams['sort'])
+      : 'relevance';
+
+  // Fetch tags for the tag picker
+  const { data: tagsData } = useListTags({ limit: 100 });
+
+  // Build API params (only include defined values)
+  const apiParams: DiscoverUsersParams = {
+    ...(selectedTagIds.length > 0 && { tags: selectedTagIds.join(',') }),
+    ...(searchQuery && { query: searchQuery }),
+    sort: sortBy,
+    limit: 24,
   };
 
-  const simulateError = () => {
-    setDataStatus('error');
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useDiscoverUsers(apiParams);
+
+  // Update tags in URL
+  const handleTagsChange = (tags: Tag[]) => {
+    if (tags.length === 0) {
+      searchParams.delete('tags');
+    } else {
+      searchParams.set('tags', tags.map(t => t._id).join(','));
+    }
+    setSearchParams(searchParams);
   };
 
-  const simulateLoading = () => {
-    setDataStatus('loading');
-    setTimeout(() => setDataStatus('success'), 2000);
+  // Update search query in URL
+  const handleSearchChange = (query: string) => {
+    if (query) {
+      searchParams.set('query', query);
+    } else {
+      searchParams.delete('query');
+    }
+    setSearchParams(searchParams);
   };
+
+  // Update sort in URL
+  const handleSortChange = (sort: DiscoverUsersParams['sort']) => {
+    if (sort) {
+      searchParams.set('sort', sort);
+    } else {
+      searchParams.delete('sort');
+    }
+    setSearchParams(searchParams);
+  };
+
+  // Load more handler
+  const handleLoadMore = async () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      await fetchNextPage();
+    }
+  };
+
+  // Get selected tags from tag IDs
+  const selectedTags = tagsData?.tags?.filter(tag => selectedTagIds.includes(tag._id)) || [];
+
+  // Get users from infinite query pages
+  const users = data?.pages.flatMap(page => page.users) || [];
 
   return (
     <div className='space-y-6'>
+      {/* Header */}
       <div className='text-center'>
-        <h1 className='text-3xl font-bold text-foreground mb-4'>Discover</h1>
+        <h1 className='text-3xl font-bold text-foreground mb-2'>Discover</h1>
         <p className='text-muted-foreground'>Find people who share your interests</p>
       </div>
 
-      {/* Demo Controls */}
-      <div className='bg-surface border border-border rounded-lg p-6'>
-        <h2 className='text-xl font-semibold mb-4'>DataState Demo Controls</h2>
-        <div className='flex flex-wrap gap-2 mb-4'>
-          <Button 
-            variant={dataStatus === 'loading' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('loading')}
-          >
-            Loading
-          </Button>
-          <Button 
-            variant={dataStatus === 'empty' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('empty')}
-          >
-            Empty
-          </Button>
-          <Button 
-            variant={dataStatus === 'error' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('error')}
-          >
-            Error
-          </Button>
-          <Button 
-            variant={dataStatus === 'success' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('success')}
-          >
-            Success
-          </Button>
+      {/* Filters Section */}
+      <div className='space-y-4'>
+        {/* Tag Filter */}
+        <div className='bg-surface border border-border rounded-lg p-4'>
+          <h2 className='text-sm font-semibold mb-3 text-foreground'>Filter by Tags</h2>
+          <AddTagBar selectedTags={selectedTags} onTagsChange={handleTagsChange} placeholder='Search and add tags...' />
         </div>
-        <div className='flex gap-2'>
-          <Button variant="secondary" onClick={simulateLoading}>
-            Simulate Loading (2s)
-          </Button>
-          <Button variant="destructive" onClick={simulateError}>
-            Simulate Error
-          </Button>
-        </div>
-      </div>
 
-      {/* Search/Filter Section */}
-      <div className='bg-surface border border-border rounded-lg p-6'>
-        <h2 className='text-xl font-semibold mb-4'>Search & Filter</h2>
-        <div className='space-y-3'>
-          <div className='h-10 w-full bg-muted animate-pulse rounded-md' />
-          <div className='flex gap-2'>
-            <div className='h-8 w-20 bg-muted animate-pulse rounded-full' />
-            <div className='h-8 w-24 bg-muted animate-pulse rounded-full' />
-            <div className='h-8 w-16 bg-muted animate-pulse rounded-full' />
+        {/* Search and Sort Controls */}
+        <div className='bg-surface border border-border rounded-lg p-4'>
+          <div className='space-y-3'>
+            {/* Search Input */}
+            <div className='flex gap-2'>
+              <div className='relative flex-1'>
+                <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+                <input
+                  type='text'
+                  placeholder='Search by username...'
+                  value={searchQuery}
+                  onChange={e => handleSearchChange(e.target.value)}
+                  className='w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary'
+                />
+              </div>
+            </div>
+
+            {/* Sort and View Options */}
+            <div className='flex gap-2 flex-wrap items-center'>
+              <div className='flex gap-1 border border-border rounded-lg p-1'>
+                <Button
+                  variant={sortBy === 'relevance' ? 'default' : 'ghost'}
+                  size='sm'
+                  onClick={() => handleSortChange('relevance')}
+                >
+                  Relevance
+                </Button>
+                <Button
+                  variant={sortBy === 'online' ? 'default' : 'ghost'}
+                  size='sm'
+                  onClick={() => handleSortChange('online')}
+                >
+                  Online
+                </Button>
+                <Button
+                  variant={sortBy === 'lastVisit' ? 'default' : 'ghost'}
+                  size='sm'
+                  onClick={() => handleSortChange('lastVisit')}
+                >
+                  Last Visit
+                </Button>
+                <Button
+                  variant={sortBy === 'name' ? 'default' : 'ghost'}
+                  size='sm'
+                  onClick={() => handleSortChange('name')}
+                >
+                  Name
+                </Button>
+              </div>
+
+              <div className='flex gap-1 border border-border rounded-lg p-1 ml-auto'>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size='sm'
+                  onClick={() => setViewMode('grid')}
+                  aria-label='Grid view'
+                >
+                  <Grid3x3 className='h-4 w-4' />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size='sm'
+                  onClick={() => setViewMode('list')}
+                  aria-label='List view'
+                >
+                  <ListIcon className='h-4 w-4' />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* DataState Demo */}
-      <DataState status={dataStatus}>
-        {/* Success State Content */}
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className='bg-surface border border-border rounded-lg p-4'>
-              <div className='space-y-3'>
-                <div className='flex items-center gap-3'>
-                  <div className='h-10 w-10 bg-muted animate-pulse rounded-full' />
-                  <div className='flex-1'>
-                    <div className='h-4 w-24 bg-muted animate-pulse rounded-md mb-1' />
-                    <div className='h-3 w-16 bg-muted animate-pulse rounded-md' />
-                  </div>
-                </div>
-                <div className='space-y-2'>
-                  <div className='h-3 w-full bg-muted animate-pulse rounded-md' />
-                  <div className='h-3 w-3/4 bg-muted animate-pulse rounded-md' />
-                </div>
-                <div className='flex gap-1 flex-wrap'>
-                  <div className='h-5 w-12 bg-muted animate-pulse rounded-full' />
-                  <div className='h-5 w-16 bg-muted animate-pulse rounded-full' />
-                  <div className='h-5 w-10 bg-muted animate-pulse rounded-full' />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </DataState>
+      {/* Users List */}
+      <UsersList
+        users={users}
+        isLoading={isLoading}
+        isLoadingMore={isFetchingNextPage}
+        hasMore={hasNextPage || false}
+        onLoadMore={handleLoadMore}
+        error={error}
+        viewMode={viewMode}
+      />
     </div>
   );
 }

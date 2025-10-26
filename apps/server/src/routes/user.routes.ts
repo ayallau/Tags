@@ -1,13 +1,17 @@
-import { Router } from "express";
+import { Router, type Router as ExpressRouter } from "express";
 import {
   getCurrentUser,
   updateCurrentUser,
+  handleDiscoverUsers,
 } from "../controllers/userController.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
 
-const router = Router();
+const router: ExpressRouter = Router();
 
-// All user routes require authentication
+// Discover users (public endpoint)
+router.get("/discover", handleDiscoverUsers);
+
+// All other routes require authentication
 router.use(requireAuth);
 
 // Get current user profile

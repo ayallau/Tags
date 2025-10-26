@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import User from "../models/User.js";
 import type { IUser } from "../models/User.js";
-import type { UpdateUserDto } from "../dtos/user.dto.js";
+import type { UpdateUserDto, DiscoverUsersQuery } from "../dtos/user.dto.js";
+import { discoverUsers as discoverUsersService } from "../services/userService.js";
 
 /**
  * Get current user profile
@@ -77,6 +78,22 @@ export async function updateCurrentUser(
     }
 
     res.json(updatedUser);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Discover users with filtering, sorting, and pagination
+ */
+export async function handleDiscoverUsers(
+  req: Request<Record<string, never>, unknown, never, DiscoverUsersQuery>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const result = await discoverUsersService(req.query);
+    res.json(result);
   } catch (err) {
     next(err);
   }

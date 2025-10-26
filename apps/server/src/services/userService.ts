@@ -1,5 +1,10 @@
 import User, { type IUser } from "../models/User.js";
-import type { CreateUserDto, GoogleUserDto } from "../dtos/index.js";
+import type {
+  CreateUserDto,
+  GoogleUserDto,
+  DiscoverUsersQuery,
+} from "../dtos/index.js";
+import { Types } from "mongoose";
 
 export async function findByEmailLower(email: string): Promise<IUser | null> {
   return await User.findOne({ emailLower: email.toLowerCase() });
@@ -48,4 +53,85 @@ export async function upsertGoogleUser({
   });
 
   return await newUser.save();
+}
+
+/**
+ * Discover users based on tags, search query, and sorting options
+ */
+export async function discoverUsers(params: DiscoverUsersQuery) {
+  const { tags, query, sort = "relevance", cursor, limit = 24 } = params;
+
+  // Build filter query
+  const filter: Record<string, any> = {};
+
+  // Filter by tags if provided
+  if (tags && tags.length > 0) {
+    const tagIds = tags
+      .split(",")
+      .filter(Boolean)
+      .map((id) => new Types.ObjectId(id));
+    filter.tags = { $in: tagIds };
+  }
+
+  // Search by username if query provided
+  if (query && query.length >= 1) {
+    filter.username = { $regex: query, $options: "i" };
+  }
+
+  // Cursor-based pagination
+  if (cursor && Types.ObjectId.isValid(cursor)) {
+    filter._id = { $gt: cursor };
+  }
+
+  // Build sort options
+  let sortOptions: Record<string, 1 | -1> = {};
+
+  switch (sort) {
+    case "online":
+      sortOptions = { isOnline: -1, lastVisitAt: -1, _id: 1 };
+      break;
+    case "lastVisit":
+      sortOptions = { lastVisitAt: -1, _id: 1 };
+      break;
+    case "name":
+      sortOptions = { username: 1, _id: 1 };
+      break;
+    case "relevance":
+    default:
+      // Sort by tags match (more tags = higher relevance)
+      // For now, default to _id ascending
+      sortOptions = { _id: 1 };
+      break;
+  }
+
+  // Fetch users with projection (only needed fields)
+  const users = await User.find(filter)
+    .select("_id username avatarUrl isOnline lastVisitAt createdAt tags")
+    .populate("tags", "slug label")
+    .sort(sortOptions)
+    .limit(limit + 1); // Fetch one extra to check if more exists
+
+  const hasMore = users.length > limit;
+  const results = hasMore ? users.slice(0, limit) : users;
+
+  return {
+    users: results.map((user) => ({
+      _id: String(user._id),
+      username: user.username,
+      avatarUrl: user.avatarUrl,
+      isOnline: user.isOnline,
+      lastVisitAt: user.lastVisitAt,
+      createdAt: user.createdAt,
+      tags: user.tags.map((tag: any) => ({
+        _id: String(tag._id),
+        slug: tag.slug,
+        label: tag.label,
+      })),
+    })),
+    nextCursor:
+      hasMore && results.length > 0
+        ? String(results[results.length - 1]._id)
+        : undefined,
+    hasMore,
+  };
 }

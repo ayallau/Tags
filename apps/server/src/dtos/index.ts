@@ -21,6 +21,7 @@ export type {
   CreateUserDto,
   UpdateUserDto,
   GoogleUserDto,
+  DiscoverUsersQuery,
 } from "./user.dto.js";
 
 export { toUserDto } from "./user.dto.js";

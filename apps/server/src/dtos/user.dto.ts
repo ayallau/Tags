@@ -50,3 +50,12 @@ export interface GoogleUserDto {
   googleId: string;
   email: string | null;
 }
+
+// Discover users query DTO
+export interface DiscoverUsersQuery {
+  tags?: string; // comma-separated tag IDs
+  query?: string; // search query for username
+  sort?: "relevance" | "online" | "lastVisit" | "name";
+  cursor?: string;
+  limit?: number;
+}

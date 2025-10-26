@@ -85,13 +85,14 @@ export function OnboardingWizard() {
     setIsSubmitting(true);
 
     try {
-      // Prepare user data
-      const updateData = {
-        username: profileInfo.username,
-        bio: profileInfo.bio,
-        location: profileInfo.location,
+      // Prepare user data (filter out undefined values)
+      const updateData: any = {
         tags: selectedTags.map(t => t._id),
       };
+
+      if (profileInfo.username) updateData.username = profileInfo.username;
+      if (profileInfo.bio) updateData.bio = profileInfo.bio;
+      if (profileInfo.location) updateData.location = profileInfo.location;
 
       await updateUserMutation.mutateAsync(updateData);
 
