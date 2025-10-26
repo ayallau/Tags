@@ -55,36 +55,18 @@ export function EmptyState({
 
   return (
     <div
-      className={cn(
-        'flex flex-col items-center justify-center py-12 px-6 text-center',
-        styles.container,
-        className
-      )}
+      className={cn('flex flex-col items-center justify-center py-12 px-6 text-center', styles.container, className)}
       role={variant === 'error' ? 'alert' : 'status'}
       aria-live={variant === 'error' ? 'assertive' : 'polite'}
     >
-      {icon && (
-        <div className={cn('mb-4', styles.icon)}>
-          {icon}
-        </div>
-      )}
-      
-      {title && (
-        <h3 className={cn('text-lg font-semibold mb-2', styles.title)}>
-          {title}
-        </h3>
-      )}
-      
-      {description && (
-        <p className={cn('text-sm max-w-md mb-6', styles.description)}>
-          {description}
-        </p>
-      )}
-      
+      {icon && <div className={cn('mb-4', styles.icon)}>{icon}</div>}
+
+      {title && <h3 className={cn('text-lg font-semibold mb-2', styles.title)}>{title}</h3>}
+
+      {description && <p className={cn('text-sm max-w-md mb-6', styles.description)}>{description}</p>}
+
       {cta && (
-        <div className="focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 rounded-md">
-          {cta}
-        </div>
+        <div className='focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 rounded-md'>{cta}</div>
       )}
     </div>
   );

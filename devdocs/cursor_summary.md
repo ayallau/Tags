@@ -1,6 +1,6 @@
 # **Development Prompt Summary**
 
-## **1. UI & App Foundation**
+## **Step 1. UI & App Foundation**
 - **AppLayout** (Header / Navbar / Content / Footer), navigation system, templates for **DataState / InfiniteScroller / Skeletons**.  
 - Full **RTL** support + **Theme Manager** with **Dark Mode**, including colors, modals, menus, and toasts.  
 - Integration of **Zustand (UI state)** + **React Query (data)**.  
@@ -578,10 +578,6 @@ git add . && git commit -m "feat(state): add Zustand UI store, app events, and R
 
 ---
 
-### **1.5 DataState Template (Idle / Loading / Empty / Error) + `EmptyState` UI**  
-
----
-
 **User**
 
 ---
@@ -657,6 +653,9 @@ git add . && git commit -m "feat(state): add Zustand UI store, app events, and R
 3. התנתקות - וודא שה-cookie נמחק
 4. התנתקות גלובלית - וודא שכל הסשנים מבוטלים
 
+---
+
+### **1.5 DataState Template (Idle / Loading / Empty / Error) + `EmptyState` UI**  
 
 ---
 
@@ -830,3 +829,129 @@ git add . && git commit -m "feat(ui): add reusable DataState & EmptyState and de
 
 ---
 
+### **1.6 Quick QA (A11y / Performance)** + sanity checks  
+
+---
+
+**User**
+
+---
+
+[Project Rules]
+- Load and follow (in this order):
+  1) .cursor\rules\project_guideline.mdc
+  2) .cursor\rules\project_rules.mdc
+  3) .cursor\rules\Recommended_Project_Plan.mdc
+- Do NOT create/update .env (examples via .env.example only).
+- Keep ESM + TypeScript "NodeNext".
+- Before changes, make a checkpoint commit:
+  git add . && git commit -m "checkpoint: before a11y/perf QA pass"
+
+[Design reference]
+- Attach: apps\web\public\DesignReference\Settings_Page.png
+- Use as inspiration only (layout/spacing/feel).
+
+[Task]
+בצע סבב QA קצר ממוקד נגישות וביצועים (ללא רגרסיות ויזואליות):
+1) Accessibility (A11y)
+   - הוסף/תקן landmark roles: <header>, <nav>, <main>, <footer> + "Skip to content" לינק בתחילת הדף.
+   - ודא aria-current="page" בניווט, aria-labels לאייקונים ללא טקסט, ו־aria-expanded/aria-controls בתפריטים.
+   - ודא focus-visible מובחן לכל רכיב אינטראקטיבי (כפתורים/קישורים/טאבים/טוגל), כולל מצב Dark.
+   - מצבי טעינה/שגיאה: role="status" + aria-live="polite" ל-loading; role="alert" או aria-live="assertive" ל-error.
+   - קיצורי מקלדת בסיסיים: Esc לסגירת מודאל דמו (אם קיים).
+
+2) Reduced Motion
+   - כבדיקה: אם window.matchMedia('(prefers-reduced-motion: reduce)') → בטל/צמצם אנימציות/טרנזישנים, בעיקר בסקליטונים/היילייטים.
+
+3) Contrast & Theming
+   - ודא יחס ניגודיות AA לטקסטים/כפתורים/לינקים ב-Light/Dark.
+   - תקן טוקנים/מחלקות במידת הצורך (רק בתוך tailwind tokens/semantic classes).
+
+4) Performance hygiene
+   - Lazy routes כבר קיימים: וודא שסקליטונים מחליפים תוכן ללא layout shift (CLS≈0).
+   - הוסף loading="lazy" לתמונות/אייקונים משולבי <img> אם קיימים.
+   - בדיקה שאין overflow אופקי ב־RTL.
+
+5) Dev-only utilities
+   - אופציונלי: רכיב קטן sr-only ל-“Skip to content” יעד, ולינק גלובלי בתחילת ה־<body> או ה־Header.
+
+[Deliverables]
+- עדכונים נקודתיים בקבצים: layout (Header/Navbar/Footer/AppLayout), רכיבי סקליטון/EmptyState, ו־styles גלובליים (focus-visible/skip link).
+- רשימת שינויים קצרה (bullet points) למה תוקן ולמה.
+
+[Acceptance Criteria]
+- כל רכיב אינטראקטיבי מקבל טבעת Focus נראית דו־תמתית (Light/Dark).
+- "Skip to content" עובד ומדלג ישירות ל־<main>.
+- אין “keyboard trap”; ניתן לעבור על כל ה־UI במקלדת בלבד.
+- ב־prefers-reduced-motion אין אנימציות בולטות.
+- אין גלילה אופקית לא־רצויה; אין CLS במעבר Theme/בזמן טעינה.
+- אין TypeScript/ESLint/Tailwind errors.
+
+[Manual Tests]
+- Keyboard-only: TAB/Shift+TAB עוברים על הלינקים בניווט, כפתורים וטוגלים; Enter/Space מפעילים אותם; Esc סוגר מודאל דמו.
+- Toggle Theme: Light↔Dark ללא קפיצות בפריסה; יחס ניגודיות AA נשמר.
+- הפעל reduced motion במערכת: אין אנימציות/שימרים מציקים.
+- בדוק מסכים: Home, Discover, Matches, Friends, Chat + מצב טעינה בעמוד אחד לפחות.
+- בדוק RTL: אין overflow-x; ה־Navbar מתחיל מצד ימין; aria-current תקין.
+
+[After completion]
+Run:
+git add . && git commit -m "chore(a11y): add skip link, improve focus-visible, aria roles/labels, contrast; reduce motion; perf hygiene"
+
+
+---
+
+**Cursor**
+
+---
+
+
+מעולה! סיימתי את סבב ה-QA לנגישות וביצועים. הנה סיכום השינויים שביצעתי:
+
+## סיכום השינויים שבוצעו
+
+### ✅ **נגישות (A11y)**
+- **הוספת Skip to content link** - לינק נסתר שמאפשר דילוג ישירות לתוכן הראשי
+- **תיקון landmark roles** - הוספת `<header>`, `<nav>`, `<main>`, `<footer>` עם תמיכה נכונה
+- **שיפור aria attributes** - תיקון `aria-expanded`, `aria-controls`, `aria-current="page"` בניווט
+- **הוספת aria-labels** - לאייקונים ללא טקסט (פרופיל, הגדרות)
+- **שיפור focus-visible** - טבעת focus נראית לכל רכיב אינטראקטיבי ב-Light/Dark mode
+- **תיקון loading states** - `role="status"` + `aria-live="polite"` ל-loading; `role="alert"` ל-error
+
+### ✅ **Reduced Motion**
+- **כבד prefers-reduced-motion** - בטל/צמצם אנימציות כשהמשתמש מעדיף זאת
+- **השבתת pulse animations** - בסקליטונים במצב reduced motion
+- **השבתת hover transitions** - במצב reduced motion
+
+### ✅ **ניגודיות ותמטיקה**
+- **שיפור יחס ניגודיות AA** - לטקסטים/כפתורים/לינקים ב-Light/Dark
+- **תמיכה ב-high contrast mode** - הגדרות מיוחדות למשתמשים עם העדפות ניגודיות גבוהות
+- **תיקון טוקנים** - שיפור צבעי focus ו-border
+
+### ✅ **ביצועים (Performance)**
+- **הוספת loading="lazy"** - לתמונות (לוגו)
+- **מניעת CLS** - וידוא שהסקליטונים לא גורמים לקפיצות בפריסה
+- **תמיכה ב-RTL** - מניעת overflow אופקי, תמיכה בכיוון ימין-שמאל
+
+### ✅ **קיצורי מקלדת**
+- **תמיכה ב-TAB navigation** - מעבר נכון בין רכיבים אינטראקטיביים
+- **שיפור focus management** - הסרת outline ברירת מחדל למשתמשי עכבר
+
+## קבצים שעודכנו:
+- `apps/web/src/components/layout/AppLayout.tsx` - Skip link + main id
+- `apps/web/src/components/layout/Header.tsx` - aria-labels + loading="lazy"
+- `apps/web/src/components/ui/ThemeToggle.tsx` - aria-expanded/aria-controls
+- `apps/web/src/components/data/EmptyState.tsx` - role="alert" ל-error variant
+- `apps/web/src/styles/globals.css` - focus-visible, reduced motion, contrast, RTL
+- `apps/web/tailwind.config.js` - sr-only utilities
+
+## בדיקות ידניות מומלצות:
+1. **מקלדת בלבד**: TAB/Shift+TAB עוברים על הלינקים בניווט, כפתורים וטוגלים
+2. **Toggle Theme**: Light↔Dark ללא קפיצות בפריסה
+3. **הפעל reduced motion**: אין אנימציות/שימרים מציקים
+4. **בדוק RTL**: אין overflow-x, Navbar מתחיל מצד ימין
+5. **Skip to content**: עובד ומדלג ישירות ל-main
+
+כל השינויים בוצעו בהתאם לתקני WCAG 2.1 AA ונבדקו ללא שגיאות linting.
+
+---

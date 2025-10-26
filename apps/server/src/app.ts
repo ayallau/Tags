@@ -10,6 +10,22 @@ import { fileURLToPath } from "node:url";
 import swaggerUi from "swagger-ui-express";
 import https from "node:https";
 import fs from "node:fs";
+import { readFileSync } from "node:fs";
+
+// Get __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Read version from package.json
+let APP_VERSION: string;
+try {
+  const packageJson = JSON.parse(
+    readFileSync(path.join(__dirname, "..", "package.json"), "utf-8")
+  );
+  APP_VERSION = packageJson.version || "unknown";
+} catch {
+  APP_VERSION = "unknown";
+}
 
 try {
   await mongoose.connect(config.MONGO_URI);
@@ -45,6 +61,24 @@ const rootHandler: RequestHandler = (_req, res): void => {
 };
 app.get("/", rootHandler);
 
+// Health endpoint
+const healthHandler: RequestHandler = (_req, res): void => {
+  res.json({
+    ok: true,
+    ts: new Date().toISOString(),
+    mode: process.env.NODE_ENV || "development",
+  });
+};
+app.get("/health", healthHandler);
+
+// Version endpoint
+const versionHandler: RequestHandler = (_req, res): void => {
+  res.json({
+    version: APP_VERSION,
+  });
+};
+app.get("/version", versionHandler);
+
 app.use("/auth", authRoutes);
 
 // Example protected route
@@ -64,9 +98,6 @@ const meHandler: RequestHandler = (req, res): void => {
 app.get("/api/me", requireAuth, meHandler);
 
 // Swagger UI setup
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const isDev = process.env.NODE_ENV === "development";
 
 if (isDev) {

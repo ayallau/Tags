@@ -13,7 +13,7 @@ export function AppLayout() {
       >
         Skip to main content
       </a>
-      
+
       <Header />
       <Navbar />
 

@@ -118,7 +118,7 @@ export default {
     },
   },
   plugins: [
-    function({ addUtilities }) {
+    function ({ addUtilities }) {
       addUtilities({
         '.sr-only': {
           position: 'absolute',

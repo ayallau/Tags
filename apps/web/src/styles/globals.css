@@ -160,17 +160,17 @@ select:focus-visible,
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   /* Disable pulse animations for skeletons */
   .animate-pulse {
     animation: none !important;
   }
-  
+
   /* Disable hover transitions */
   .hover\\:opacity-80:hover {
     opacity: 1 !important;
   }
-  
+
   .hover\\:bg-muted\\/80:hover {
     background-color: inherit !important;
   }
@@ -238,9 +238,13 @@ select:focus-visible {
     --foreground: 0 0% 100%;
     --foreground-muted: 0 0% 80%;
   }
-  
+
   /* Ensure minimum contrast for interactive elements */
-  button, a, input, textarea, select {
+  button,
+  a,
+  input,
+  textarea,
+  select {
     border: 2px solid currentColor;
   }
 }
