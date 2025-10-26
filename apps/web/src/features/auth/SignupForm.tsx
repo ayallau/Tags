@@ -10,10 +10,12 @@ import { LoginFormGoogle } from './LoginFormGoogle';
 
 export function SignupForm() {
   const signupMutation = useSignup();
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<{
+    username?: string;
     email?: string;
     password?: string;
     confirmPassword?: string;
@@ -21,10 +23,19 @@ export function SignupForm() {
 
   const validate = () => {
     const newErrors: {
+      username?: string;
       email?: string;
       password?: string;
       confirmPassword?: string;
     } = {};
+
+    if (!username) {
+      newErrors.username = 'Username is required';
+    } else if (username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+    } else if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      newErrors.username = 'Username can only contain letters, numbers, underscores, and hyphens';
+    }
 
     if (!email) {
       newErrors.email = 'Email is required';
@@ -53,11 +64,28 @@ export function SignupForm() {
       return;
     }
 
-    signupMutation.mutate({ email, password });
+    signupMutation.mutate({ username, email, password });
   };
 
   return (
     <form onSubmit={handleSubmit} className='space-y-4'>
+      {/* Username Input */}
+      <div className='space-y-2'>
+        <label htmlFor='signup-username' className='text-sm font-medium'>
+          Username
+        </label>
+        <Input
+          id='signup-username'
+          type='text'
+          placeholder='your_username'
+          value={username}
+          onChange={e => setUsername(e.target.value)}
+          disabled={signupMutation.isPending}
+          className={errors.username ? 'border-destructive' : ''}
+        />
+        {errors.username && <p className='text-sm text-destructive'>{errors.username}</p>}
+      </div>
+
       {/* Email Input */}
       <div className='space-y-2'>
         <label htmlFor='signup-email' className='text-sm font-medium'>

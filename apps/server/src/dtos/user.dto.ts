@@ -80,6 +80,7 @@ export const UpdatePhotosSchema = z.object({
 // ========================================
 
 export interface CreateUserDto {
+  username: string;
   email: string;
   passwordHash: string;
 }

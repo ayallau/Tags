@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface ProfileInfo {
-  username?: string;
   bio?: string;
   location?: string;
 }
@@ -24,10 +23,6 @@ export function ProfileInfoStep({ data, onChange, onNext, onBack }: ProfileInfoS
 
   const validate = (): boolean => {
     const newErrors: Partial<ProfileInfo> = {};
-
-    if (!data.username || data.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
-    }
 
     if (data.bio && data.bio.length > 500) {
       newErrors.bio = 'Bio must be less than 500 characters';
@@ -57,22 +52,6 @@ export function ProfileInfoStep({ data, onChange, onNext, onBack }: ProfileInfoS
       </div>
 
       <div className='max-w-md mx-auto space-y-4'>
-        {/* Username */}
-        <div>
-          <label htmlFor='username' className='block text-sm font-medium mb-2'>
-            Username <span className='text-red-500'>*</span>
-          </label>
-          <input
-            id='username'
-            type='text'
-            value={data.username || ''}
-            onChange={e => onChange({ ...data, username: e.target.value })}
-            className='w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white'
-            placeholder='Your username'
-          />
-          {errors.username && <p className='text-sm text-red-500 mt-1'>{errors.username}</p>}
-        </div>
-
         {/* Location */}
         <div>
           <label htmlFor='location' className='block text-sm font-medium mb-2'>

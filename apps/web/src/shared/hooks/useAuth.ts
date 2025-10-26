@@ -14,6 +14,7 @@ interface LoginDto {
 }
 
 interface SignupDto {
+  username: string;
   email: string;
   password: string;
 }
@@ -87,21 +88,34 @@ export function useLogin() {
         if (userData && userData._id) {
           const { login } = useAuthStore.getState();
           login(userData, data.accessToken);
+
+          pushToast({
+            title: 'Success',
+            description: 'Logged in successfully',
+            type: 'success',
+          });
+
+          // Redirect based on onboarding status
+          if (!userData.isOnboardingComplete) {
+            // Not completed onboarding, redirect there
+            navigate('/onboarding');
+          } else {
+            // Completed onboarding, go to intended route or home
+            const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
+            sessionStorage.removeItem('intendedRoute');
+            navigate(intendedRoute);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch user data after login:', error);
+        pushToast({
+          title: 'Success',
+          description: 'Logged in successfully',
+          type: 'success',
+        });
+        // Default to onboarding if we can't fetch user data
+        navigate('/onboarding');
       }
-
-      pushToast({
-        title: 'Success',
-        description: 'Logged in successfully',
-        type: 'success',
-      });
-
-      // Redirect to intended route or home
-      const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
-      sessionStorage.removeItem('intendedRoute');
-      navigate(intendedRoute);
     },
     onError: (error: Error) => {
       let message = 'Failed to login';
@@ -143,20 +157,33 @@ export function useSignup() {
         const userData = (await queryClient.fetchQuery({ queryKey: authKeys.me })) as any;
         if (userData && userData._id) {
           login(userData, data.accessToken);
+
+          pushToast({
+            title: 'Account Created',
+            description: 'Welcome! Please complete your profile',
+            type: 'success',
+          });
+
+          // Redirect based on onboarding status
+          if (!userData.isOnboardingComplete) {
+            navigate('/onboarding');
+          } else {
+            // Already completed onboarding, go to home
+            const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
+            sessionStorage.removeItem('intendedRoute');
+            navigate(intendedRoute);
+          }
         }
       } catch (error) {
-        // If /me fails, still allow signup but with limited info
+        // If /me fails, redirect to onboarding as fallback
         console.error('Failed to fetch user data after signup:', error);
+        pushToast({
+          title: 'Account Created',
+          description: 'Welcome! Please complete your profile',
+          type: 'success',
+        });
+        navigate('/onboarding');
       }
-
-      pushToast({
-        title: 'Account Created',
-        description: 'Welcome! Please complete your profile',
-        type: 'success',
-      });
-
-      // Redirect to onboarding
-      navigate('/onboarding');
     },
     onError: (error: Error) => {
       let message = 'Failed to create account';

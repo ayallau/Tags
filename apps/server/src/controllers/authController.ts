@@ -64,12 +64,21 @@ export async function registerWithEmail(
 ): Promise<any> {
   // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
+
+    // Check if email already exists
     if (await findByEmailLower(email)) {
       return res.status(409).json({ error: "Email already in use" });
     }
+
+    // Check if username already exists
+    const existingUserWithUsername = await User.findOne({ username });
+    if (existingUserWithUsername) {
+      return res.status(409).json({ error: "Username already taken" });
+    }
+
     const passwordHash = await hashPassword(password);
-    const newUser = await createUser({ email, passwordHash });
+    const newUser = await createUser({ username, email, passwordHash });
     const accessToken = createAccessToken(newUser, "email");
     const refreshToken = createRefreshToken(newUser);
 
@@ -77,11 +86,20 @@ export async function registerWithEmail(
     res.cookie("tags_refresh_token", refreshToken, getAuthCookieOptionsAuto());
 
     console.log(
-      `[${new Date().toISOString()}] User registered successfully - email: ${email}`
+      `[${new Date().toISOString()}] User registered successfully - username: ${username}, email: ${email}`
     );
 
     res.status(201).json({ accessToken });
   } catch (err) {
+    // Handle MongoDB unique constraint errors
+    if (err instanceof Error && err.message.includes("duplicate")) {
+      if (err.message.includes("username")) {
+        return res.status(409).json({ error: "Username already taken" });
+      }
+      if (err.message.includes("emailLower")) {
+        return res.status(409).json({ error: "Email already in use" });
+      }
+    }
     next(err);
   }
 }

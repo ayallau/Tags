@@ -15,7 +15,6 @@ import { useUpdateUser } from '../../shared/hooks/useUser';
 import type { Tag } from '../../shared/types/tag';
 
 interface ProfileInfo {
-  username?: string;
   bio?: string;
   location?: string;
 }
@@ -86,22 +85,57 @@ export function OnboardingWizard() {
 
     try {
       // Prepare user data (filter out undefined values)
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         tags: selectedTags.map(t => t._id),
       };
 
-      if (profileInfo.username) updateData.username = profileInfo.username;
-      if (profileInfo.bio) updateData.bio = profileInfo.bio;
-      if (profileInfo.location) updateData.location = profileInfo.location;
+      if (profileInfo.bio) updateData['bio'] = profileInfo.bio;
+      if (profileInfo.location) updateData['location'] = profileInfo.location;
 
       await updateUserMutation.mutateAsync(updateData);
 
       // Navigate to discover page
       navigate('/discover');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit onboarding data:', error);
       // TODO: Show error toast
       setIsSubmitting(false);
+    }
+  };
+
+  const handleContinueLater = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // Prepare partial user data with only what we have so far
+      const updateData: Record<string, unknown> = {};
+
+      if (profileInfo.bio) updateData['bio'] = profileInfo.bio;
+      if (profileInfo.location) updateData['location'] = profileInfo.location;
+      if (selectedTags.length > 0) {
+        updateData['tags'] = selectedTags.map(t => t._id);
+      }
+
+      // Only update if we have some data
+      if (Object.keys(updateData).length > 0) {
+        await updateUserMutation.mutateAsync(updateData);
+      }
+
+      setIsSubmitting(false);
+
+      // Navigate to home page
+      navigate('/discover');
+    } catch (error) {
+      // Log error but still navigate
+      // eslint-disable-next-line no-console
+      console.error('Failed to save partial onboarding data:', error);
+      setIsSubmitting(false);
+
+      // Even if save fails, navigate to home
+      navigate('/discover');
     }
   };
 
@@ -149,6 +183,19 @@ export function OnboardingWizard() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Continue Later Button - shown only in profile and tags steps */}
+        {(currentStep === 'profile' || currentStep === 'tags') && (
+          <div className='text-center'>
+            <button
+              onClick={handleContinueLater}
+              disabled={isSubmitting}
+              className='px-6 py-3 text-muted-foreground hover:text-foreground font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+            >
+              Continue Later
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

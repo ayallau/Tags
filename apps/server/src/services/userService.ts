@@ -13,6 +13,7 @@ export async function findByEmailLower(email: string): Promise<IUser | null> {
 
 export async function createUser(userData: CreateUserDto): Promise<IUser> {
   const user = new User({
+    username: userData.username,
     emailLower: userData.email.toLowerCase(),
     passwordHash: userData.passwordHash,
   });
