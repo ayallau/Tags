@@ -16,7 +16,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "echo \"No tests yet\" && exit 0",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "seed:tags": "tsx src/scripts/seedTags.ts",
+    "rebuild:matches": "tsx src/scripts/rebuildMatches.ts"
   },
   "author": "",
   "license": "ISC",
