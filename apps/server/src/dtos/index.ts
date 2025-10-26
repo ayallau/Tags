@@ -22,3 +22,11 @@ export type {
   MessageResponseDto,
   ErrorResponseDto,
 } from "./auth.dto.js";
+
+export type {
+  BookmarkResponse,
+  BookmarkListResponse,
+  CreateBookmarkDto,
+  UpdateBookmarkDto,
+  BookmarkQueryDto,
+} from "./bookmark.dto.js";

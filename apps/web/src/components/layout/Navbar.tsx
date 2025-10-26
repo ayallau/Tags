@@ -4,6 +4,7 @@ import { cn } from '../../shared/lib/utils';
 const navigationItems = [
   { name: 'Discover', href: '/discover', icon: '🔍' },
   { name: 'Matches', href: '/matches', icon: '💕' },
+  { name: 'Bookmarks', href: '/bookmarks', icon: '⭐' },
   { name: 'Friends', href: '/friends', icon: '👥' },
   { name: 'Chat', href: '/chat', icon: '💬' },
 ];

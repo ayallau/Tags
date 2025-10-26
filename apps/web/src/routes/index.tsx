@@ -4,6 +4,7 @@ import { lazy } from 'react';
 export const HomePage = lazy(() => import('../pages/HomePage'));
 export const DiscoverPage = lazy(() => import('../pages/DiscoverPage'));
 export const MatchesPage = lazy(() => import('../pages/MatchesPage'));
+export const BookmarksPage = lazy(() => import('../pages/BookmarksPage'));
 export const FriendsPage = lazy(() => import('../pages/FriendsPage'));
 export const ChatPage = lazy(() => import('../pages/ChatPage'));
 export const ProfilePage = lazy(() => import('../pages/ProfilePage'));
@@ -38,6 +39,11 @@ export const routes: RouteConfig[] = [
     path: '/matches',
     component: MatchesPage,
     title: 'Matches',
+  },
+  {
+    path: '/bookmarks',
+    component: BookmarksPage,
+    title: 'Bookmarks',
   },
   {
     path: '/friends',

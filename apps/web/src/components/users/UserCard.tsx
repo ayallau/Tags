@@ -3,16 +3,43 @@
  * Displays a single user's preview in Discover/Matches lists
  */
 
-import { User as UserIcon } from 'lucide-react';
+import { User as UserIcon, Bookmark } from 'lucide-react';
 import { TagPill } from '../tags/TagPill';
+import { Button } from '../ui/button';
+import { useAddBookmark } from '../../shared/hooks/useBookmarks';
+import { useState, useEffect } from 'react';
 import type { UserPreview } from '../../shared/types/user';
 
 interface UserCardProps {
   user: UserPreview;
   className?: string;
+  showBookmarkButton?: boolean;
 }
 
-export function UserCard({ user, className = '' }: UserCardProps) {
+export function UserCard({ user, className = '', showBookmarkButton = false }: UserCardProps) {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  const addBookmarkMutation = useAddBookmark();
+
+  // Check if user is bookmarked
+  useEffect(() => {
+    if (showBookmarkButton) {
+      // TODO: Implement check bookmark query when ready
+      setIsChecking(false);
+    }
+  }, [showBookmarkButton, user._id]);
+
+  const handleBookmark = () => {
+    addBookmarkMutation.mutate(
+      { targetUserId: user._id },
+      {
+        onSuccess: () => {
+          setIsBookmarked(true);
+        },
+      }
+    );
+  };
   return (
     <div className={`border border-border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow ${className}`}>
       {/* Header with avatar and online status */}
@@ -39,6 +66,18 @@ export function UserCard({ user, className = '' }: UserCardProps) {
             </p>
           )}
         </div>
+        {showBookmarkButton && (
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={handleBookmark}
+            disabled={isBookmarked || addBookmarkMutation.isPending || isChecking}
+            className='flex-shrink-0'
+            aria-label={isBookmarked ? 'Bookmarked' : 'Bookmark user'}
+          >
+            <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
+          </Button>
+        )}
       </div>
 
       {/* Tags */}

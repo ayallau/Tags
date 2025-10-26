@@ -9,6 +9,7 @@ import passport from "./services/passport.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import tagRoutes from "./routes/tag.routes.js";
+import bookmarkRoutes from "./routes/bookmark.routes.js";
 import config from "./config.js";
 import mongoose from "mongoose";
 import path from "node:path";
@@ -183,6 +184,7 @@ app.get("/version", versionHandler);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/tags", tagRoutes);
+app.use("/bookmarks", bookmarkRoutes);
 
 // Example protected route
 import { requireAuth } from "./middlewares/requireAuth.js";

@@ -6,6 +6,7 @@ import {
   HomePage,
   DiscoverPage,
   MatchesPage,
+  BookmarksPage,
   FriendsPage,
   ChatPage,
   ProfilePage,
@@ -48,6 +49,14 @@ function App() {
             element={
               <Suspense fallback={<PageSkeleton />}>
                 <MatchesPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path='bookmarks'
+            element={
+              <Suspense fallback={<PageSkeleton />}>
+                <BookmarksPage />
               </Suspense>
             }
           />
