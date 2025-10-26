@@ -15,7 +15,6 @@ import swaggerUi from "swagger-ui-express";
 import https from "node:https";
 import fs from "node:fs";
 import { readFileSync } from "node:fs";
-import type { BufferEncoding } from "node:buffer";
 import logger from "./lib/logger.js";
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
 import helmet from "helmet";
@@ -128,12 +127,13 @@ app.use(
     const originalEnd = res.end.bind(res);
     const wrappedEnd = res.end;
 
-    res.end = function (chunk?: unknown, encoding?: BufferEncoding | unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    res.end = function (...args: any[]) {
       if (wrappedEnd === res.end && req.startTime) {
         const duration = Date.now() - startTime;
         logger.request(req, res, duration);
       }
-      return originalEnd(chunk, encoding as BufferEncoding);
+      return originalEnd(...args);
     };
 
     next();
@@ -208,7 +208,9 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Start the server
-let server: any;
+let server:
+  | ReturnType<typeof app.listen>
+  | ReturnType<typeof https.createServer>;
 
 if (config.SSL_ENABLED) {
   try {
