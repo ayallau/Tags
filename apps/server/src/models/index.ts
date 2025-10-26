@@ -4,6 +4,7 @@ import TagModel from "./Tag.js";
 import PasswordResetTokenModel from "./PasswordResetToken.js";
 import MatchScoreModel from "./MatchScore.js";
 import BookmarkModel from "./Bookmark.js";
+import FriendModel from "./Friend.js";
 
 // Export all models
 export {
@@ -12,6 +13,7 @@ export {
   PasswordResetTokenModel,
   MatchScoreModel,
   BookmarkModel,
+  FriendModel,
 };
 
 // Model names
@@ -21,6 +23,7 @@ export const MODEL_NAMES = {
   PASSWORD_RESET_TOKEN: "PasswordResetToken",
   MATCH_SCORE: "MatchScore",
   BOOKMARK: "Bookmark",
+  FRIEND: "Friend",
 } as const;
 
 /**
