@@ -15,7 +15,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
-  const { authState, setAuthState, isOnboardingComplete } = useAuthStore();
+  const { authState, setAuthState } = useAuthStore();
 
   // Fetch current user on mount
   const { data, isLoading, isError } = useAuthMe();
@@ -44,10 +44,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to='/welcome' replace />;
   }
 
-  // Redirect to onboarding if not completed
-  if (!isOnboardingComplete() && location.pathname !== '/onboarding') {
-    return <Navigate to='/onboarding' replace />;
-  }
+  // Note: We allow navigation even if onboarding is incomplete
+  // The OnboardingBanner in AppLayout will remind users to complete it
 
   // Render protected content
   return children;

@@ -95,16 +95,10 @@ export function useLogin() {
             type: 'success',
           });
 
-          // Redirect based on onboarding status
-          if (!userData.isOnboardingComplete) {
-            // Not completed onboarding, redirect there
-            navigate('/onboarding');
-          } else {
-            // Completed onboarding, go to intended route or home
-            const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
-            sessionStorage.removeItem('intendedRoute');
-            navigate(intendedRoute);
-          }
+          // Navigate to intended route or discover
+          const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
+          sessionStorage.removeItem('intendedRoute');
+          navigate(intendedRoute);
         }
       } catch (error) {
         console.error('Failed to fetch user data after login:', error);
@@ -113,8 +107,8 @@ export function useLogin() {
           description: 'Logged in successfully',
           type: 'success',
         });
-        // Default to onboarding if we can't fetch user data
-        navigate('/onboarding');
+        // Default to discover if we can't fetch user data
+        navigate('/discover');
       }
     },
     onError: (error: Error & { status?: number }) => {
@@ -169,25 +163,20 @@ export function useSignup() {
             type: 'success',
           });
 
-          // Redirect based on onboarding status
-          if (!userData.isOnboardingComplete) {
-            navigate('/onboarding');
-          } else {
-            // Already completed onboarding, go to home
-            const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
-            sessionStorage.removeItem('intendedRoute');
-            navigate(intendedRoute);
-          }
+          // Navigate to intended route or discover
+          const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
+          sessionStorage.removeItem('intendedRoute');
+          navigate(intendedRoute);
         }
       } catch (error) {
-        // If /me fails, redirect to onboarding as fallback
+        // If /me fails, redirect to discover as fallback
         console.error('Failed to fetch user data after signup:', error);
         pushToast({
           title: 'Account Created',
           description: 'Welcome! Please complete your profile',
           type: 'success',
         });
-        navigate('/onboarding');
+        navigate('/discover');
       }
     },
     onError: (error: Error & { status?: number }) => {

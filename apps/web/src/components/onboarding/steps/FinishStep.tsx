@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 import type { Tag } from '../../../shared/types/tag';
 
 interface ProfileInfo {
-  username?: string;
   bio?: string;
   location?: string;
 }
@@ -40,11 +39,6 @@ export function FinishStep({ profileInfo, selectedTags, onSubmit, onBack, isSubm
           <h3 className='font-semibold text-foreground'>Profile Summary</h3>
 
           <div className='space-y-3'>
-            <div>
-              <p className='text-xs text-muted-foreground mb-1'>Username</p>
-              <p className='font-medium text-foreground'>{profileInfo.username || 'Not set'}</p>
-            </div>
-
             {profileInfo.location && (
               <div>
                 <p className='text-xs text-muted-foreground mb-1'>Location</p>

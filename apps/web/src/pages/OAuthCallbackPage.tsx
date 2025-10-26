@@ -55,14 +55,10 @@ export default function OAuthCallbackPage() {
             type: 'success',
           });
 
-          // Redirect based on onboarding status
-          if (!userData.isOnboardingComplete) {
-            navigate('/onboarding');
-          } else {
-            const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
-            sessionStorage.removeItem('intendedRoute');
-            navigate(intendedRoute);
-          }
+          // Navigate to intended route or discover
+          const intendedRoute = sessionStorage.getItem('intendedRoute') || '/discover';
+          sessionStorage.removeItem('intendedRoute');
+          navigate(intendedRoute);
 
           setStatus('success');
         } else {

@@ -59,8 +59,13 @@ export function UserTitleGrid({ className = '' }: UserTitleGridProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } = useRecentUsers({ limit: 24 });
 
-  // Flatten all users from pages
-  const allUsers: RecentUser[] = data?.pages.flatMap((page: any) => page.users) || [];
+  // Flatten all users from pages, filter out invalid entries, and limit to 100
+  const totalCap = 100;
+  const allUsers: RecentUser[] =
+    data?.pages
+      .flatMap((page: any) => page.users || [])
+      .filter((user: RecentUser | null | undefined): user is RecentUser => Boolean(user && user._id))
+      .slice(0, totalCap) || [];
 
   // Infinite scroll observer
   useEffect(() => {

@@ -36,8 +36,6 @@ async function fetchRecentUsers(params: RecentUsersParams): Promise<RecentUsersR
 }
 
 export function useRecentUsers(params: RecentUsersParams = { limit: 24 }) {
-  const totalCap = 100; // Maximum total users to load
-
   return useInfiniteQuery({
     queryKey: ['recent-users', params],
     queryFn: ({ pageParam }) => {
@@ -49,15 +47,6 @@ export function useRecentUsers(params: RecentUsersParams = { limit: 24 }) {
     },
     getNextPageParam: lastPage => lastPage.nextCursor,
     initialPageParam: undefined as string | undefined,
-    select: data => {
-      // Flatten pages and limit to totalCap
-      const allUsers = data.pages.flatMap((page: RecentUsersResponse) => page.users);
-      const limitedUsers = allUsers.slice(0, totalCap);
-      return {
-        ...data,
-        pages: limitedUsers,
-      };
-    },
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
   });

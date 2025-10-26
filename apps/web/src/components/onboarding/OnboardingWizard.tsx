@@ -13,6 +13,7 @@ import { SelectTagsStep } from './steps/SelectTagsStep';
 import { FinishStep } from './steps/FinishStep';
 import { useUpdateUser } from '../../shared/hooks/useUser';
 import type { Tag } from '../../shared/types/tag';
+import { Button } from '../ui/button';
 
 interface ProfileInfo {
   bio?: string;
@@ -184,16 +185,18 @@ export function OnboardingWizard() {
           </AnimatePresence>
         </div>
 
-        {/* Continue Later Button - shown only in profile and tags steps */}
-        {(currentStep === 'profile' || currentStep === 'tags') && (
+        {/* Continue Later Button - shown in welcome, profile and tags steps */}
+        {(currentStep === 'welcome' || currentStep === 'profile' || currentStep === 'tags') && (
           <div className='text-center'>
-            <button
+            <Button
               onClick={handleContinueLater}
               disabled={isSubmitting}
-              className='px-6 py-3 text-muted-foreground hover:text-foreground font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+              variant='outline'
+              size='lg'
+              className='border-border/50 hover:border-border hover:bg-muted transition-all hover:shadow-sm text-sm'
             >
               Continue Later
-            </button>
+            </Button>
           </div>
         )}
       </div>
