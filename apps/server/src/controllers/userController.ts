@@ -3,6 +3,8 @@ import User from "../models/User.js";
 import type { IUser } from "../models/User.js";
 import type { UpdateUserDto, DiscoverUsersQuery } from "../dtos/user.dto.js";
 import { discoverUsers as discoverUsersService } from "../services/userService.js";
+import { incrementalUpdateForUser } from "../services/userMatchService.js";
+import { Types } from "mongoose";
 
 /**
  * Get current user profile
@@ -65,6 +67,9 @@ export async function updateCurrentUser(
     if (photos !== undefined) updateData.photos = photos as any;
     if (tags !== undefined) updateData.tags = tags as any;
 
+    // Track if tags changed
+    const tagsChanged = tags !== undefined;
+
     // Update user
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
@@ -75,6 +80,22 @@ export async function updateCurrentUser(
     if (!updatedUser) {
       res.status(404).json({ error: "User not found" });
       return;
+    }
+
+    // Trigger incremental match score update if tags changed
+    if (tagsChanged) {
+      try {
+        await incrementalUpdateForUser(user._id as Types.ObjectId);
+        console.log(
+          `[MatchScore] Incremental update triggered for user ${user._id}`
+        );
+      } catch (matchErr) {
+        console.error(
+          `[MatchScore] Error updating matches for user ${user._id}:`,
+          matchErr
+        );
+        // Don't fail the request if match update fails
+      }
     }
 
     res.json(updatedUser);

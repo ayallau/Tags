@@ -1,8 +1,18 @@
 // src/dtos/index.ts
+export type {
+  UserDto,
+  CreateUserDto,
+  UpdateUserDto,
+  GoogleUserDto,
+  DiscoverUsersQuery,
+} from "./user.dto.js";
 
-// ========================================
-// Auth DTOs
-// ========================================
+export type {
+  GetMatchesQuery,
+  MatchDto,
+  GetMatchesResponse,
+} from "./match.dto.js";
+
 export type {
   LoginDto,
   RegisterDto,
@@ -12,35 +22,3 @@ export type {
   MessageResponseDto,
   ErrorResponseDto,
 } from "./auth.dto.js";
-
-// ========================================
-// User DTOs
-// ========================================
-export type {
-  UserDto,
-  CreateUserDto,
-  UpdateUserDto,
-  GoogleUserDto,
-  DiscoverUsersQuery,
-} from "./user.dto.js";
-
-export { toUserDto } from "./user.dto.js";
-
-// ========================================
-// Tag DTOs
-// ========================================
-export type {
-  CreateTagDto,
-  UpdateTagDto,
-  TagQueryDto,
-  TagSearchDto,
-  TagResponse,
-  TagListResponse,
-} from "./tag.dto.js";
-
-export {
-  CreateTagSchema,
-  UpdateTagSchema,
-  TagQuerySchema,
-  TagSearchSchema,
-} from "./tag.dto.js";

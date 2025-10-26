@@ -2,15 +2,17 @@ import mongoose from "mongoose";
 import UserModel from "./User.js";
 import TagModel from "./Tag.js";
 import PasswordResetTokenModel from "./PasswordResetToken.js";
+import MatchScoreModel from "./MatchScore.js";
 
 // Export all models
-export { UserModel, TagModel, PasswordResetTokenModel };
+export { UserModel, TagModel, PasswordResetTokenModel, MatchScoreModel };
 
 // Model names
 export const MODEL_NAMES = {
   USER: "User",
   TAG: "Tag",
   PASSWORD_RESET_TOKEN: "PasswordResetToken",
+  MATCH_SCORE: "MatchScore",
 } as const;
 
 /**
