@@ -6,18 +6,21 @@ import {
   getTagById,
   updateTag,
   deleteTag,
+  getPopularTags,
 } from "../services/tagService.js";
 import {
   CreateTagSchema,
   UpdateTagSchema,
   TagQuerySchema,
   TagSearchSchema,
+  PopularTagsSchema,
 } from "../dtos/tag.dto.js";
 import type {
   CreateTagDto,
   UpdateTagDto,
   TagQueryDto,
   TagSearchDto,
+  PopularTagsDto,
 } from "../dtos/tag.dto.js";
 import logger from "../lib/logger.js";
 
@@ -203,6 +206,28 @@ export async function handleDeleteTag(
       res.status(404).json({ error: err.message });
       return;
     }
+    next(err);
+  }
+}
+
+/**
+ * Get popular tags
+ * GET /tags/popular?limit=30&fillRandom=true
+ * Auth: Optional
+ */
+export async function handlePopularTags(
+  req: Request<Record<string, never>, unknown, never, PopularTagsDto>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    // Validate query params
+    const validated = PopularTagsSchema.parse(req.query);
+
+    const tags = await getPopularTags(validated);
+
+    res.json(tags);
+  } catch (err) {
     next(err);
   }
 }

@@ -1,9 +1,16 @@
 import type { Request, Response, NextFunction } from "express";
 import User from "../models/User.js";
 import type { IUser } from "../models/User.js";
-import type { UpdateUserDto, DiscoverUsersQuery } from "../dtos/user.dto.js";
+import type {
+  UpdateUserDto,
+  DiscoverUsersQuery,
+  RecentUsersDto,
+} from "../dtos/user.dto.js";
 import { UpdateProfileSchema } from "../dtos/user.dto.js";
-import { discoverUsers as discoverUsersService } from "../services/userService.js";
+import {
+  discoverUsers as discoverUsersService,
+  getRecentUsers as getRecentUsersService,
+} from "../services/userService.js";
 import { Types } from "mongoose";
 
 /**
@@ -143,6 +150,28 @@ export async function handleDiscoverUsers(
       ? new Types.ObjectId(String((req.user as IUser)._id))
       : undefined;
     const result = await discoverUsersService(req.query, currentUserId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Get recent users sorted by lastVisitAt
+ * GET /users/recent?limit=24&cursor=
+ * Auth: Optional
+ */
+export async function handleGetRecentUsers(
+  req: Request<Record<string, never>, unknown, never, RecentUsersDto>,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    // Get current user ID if authenticated (for privacy filtering)
+    const currentUserId = req.user
+      ? new Types.ObjectId(String((req.user as IUser)._id))
+      : undefined;
+    const result = await getRecentUsersService(req.query, currentUserId);
     res.json(result);
   } catch (err) {
     next(err);

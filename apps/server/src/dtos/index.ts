@@ -5,6 +5,7 @@ export type {
   UpdateUserDto,
   GoogleUserDto,
   DiscoverUsersQuery,
+  RecentUsersDto,
 } from "./user.dto.js";
 
 export type {

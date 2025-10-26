@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../../shared/lib/utils';
 
 const navigationItems = [
+  { name: 'Home', href: '/', icon: '🏠' },
   { name: 'Discover', href: '/discover', icon: '🔍' },
   { name: 'Matches', href: '/matches', icon: '💕' },
   { name: 'Bookmarks', href: '/bookmarks', icon: '⭐' },

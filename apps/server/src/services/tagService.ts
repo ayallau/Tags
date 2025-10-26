@@ -163,3 +163,99 @@ export async function deleteTag(id: string): Promise<void> {
     throw new Error("Tag not found");
   }
 }
+
+/**
+ * Get popular tags by user count with optional random fill
+ */
+export async function getPopularTags(params: {
+  limit: number;
+  fillRandom?: boolean;
+}): Promise<
+  Array<{ _id: string; slug: string; label: string; usersCount: number }>
+> {
+  const { limit, fillRandom = false } = params;
+
+  // Get tags with user count using aggregation
+  const popularTags = await TagModel.aggregate([
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "tags",
+        as: "users",
+      },
+    },
+    {
+      $addFields: {
+        usersCount: { $size: "$users" },
+      },
+    },
+    {
+      $match: {
+        usersCount: { $gt: 0 },
+      },
+    },
+    {
+      $sort: { usersCount: -1, label: 1 },
+    },
+    {
+      $limit: limit,
+    },
+    {
+      $project: {
+        _id: 1,
+        slug: 1,
+        label: 1,
+        usersCount: 1,
+      },
+    },
+  ]);
+
+  // Fill with random tags if needed
+  if (fillRandom && popularTags.length < limit) {
+    const existingIds = new Set(popularTags.map((t) => String(t._id)));
+    const needed = limit - popularTags.length;
+
+    // Get random tags not in the popular list
+    const randomTags = await TagModel.aggregate([
+      {
+        $match: {
+          _id: {
+            $nin: Array.from(existingIds).map((id) => new Types.ObjectId(id)),
+          },
+        },
+      },
+      { $sample: { size: needed } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "tags",
+          as: "users",
+        },
+      },
+      {
+        $addFields: {
+          usersCount: { $size: "$users" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          slug: 1,
+          label: 1,
+          usersCount: 1,
+        },
+      },
+    ]);
+
+    popularTags.push(...randomTags);
+  }
+
+  return popularTags.map((tag) => ({
+    _id: String(tag._id),
+    slug: tag.slug,
+    label: tag.label,
+    usersCount: tag.usersCount,
+  }));
+}

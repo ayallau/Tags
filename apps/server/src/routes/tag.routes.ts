@@ -6,6 +6,7 @@ import {
   handleGetTag,
   handleUpdateTag,
   handleDeleteTag,
+  handlePopularTags,
 } from "../controllers/tagController.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
 import rateLimit from "express-rate-limit";
@@ -25,6 +26,7 @@ const searchRateLimit = rateLimit({
 // Public routes
 router.get("/", handleListTags);
 router.get("/search", searchRateLimit, handleSearchTags);
+router.get("/popular", handlePopularTags);
 router.get("/:id", handleGetTag);
 
 // Protected routes (require authentication)

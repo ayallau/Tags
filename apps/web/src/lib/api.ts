@@ -121,7 +121,22 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> 
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+    let errorMessage = response.statusText;
+
+    // Try to parse error response as JSON
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch {
+      // If not JSON, use the raw error text
+      errorMessage = errorText || response.statusText;
+    }
+
+    const error = new Error(errorMessage) as Error & { status: number };
+    error.status = response.status;
+    throw error;
   }
 
   // Handle 204 No Content

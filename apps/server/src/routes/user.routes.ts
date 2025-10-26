@@ -3,6 +3,7 @@ import {
   getCurrentUser,
   updateCurrentUser,
   handleDiscoverUsers,
+  handleGetRecentUsers,
 } from "../controllers/userController.js";
 import { getMatches } from "../controllers/matchController.js";
 import { requireAuth } from "../middlewares/requireAuth.js";
@@ -21,6 +22,9 @@ const updateProfileRateLimit = rateLimit({
 
 // Discover users (public endpoint)
 router.get("/discover", handleDiscoverUsers);
+
+// Recent users (public endpoint)
+router.get("/recent", handleGetRecentUsers);
 
 // All other routes require authentication
 router.use(requireAuth);

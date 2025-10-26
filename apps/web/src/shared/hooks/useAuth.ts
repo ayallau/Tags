@@ -117,13 +117,18 @@ export function useLogin() {
         navigate('/onboarding');
       }
     },
-    onError: (error: Error) => {
+    onError: (error: Error & { status?: number }) => {
       let message = 'Failed to login';
-      if (error.message.includes('400')) {
-        message = 'Invalid credentials';
-      } else if (error.message.includes('401')) {
-        message = 'Email or password is incorrect';
+
+      // Check status code if available
+      if ((error as any).status === 400 || (error as any).status === 401) {
+        message = error.message || 'Invalid email or password';
+      } else if ((error as any).status === 500) {
+        message = 'Server error. Please try again later.';
+      } else {
+        message = error.message || 'Failed to login';
       }
+
       pushToast({
         title: 'Login Failed',
         description: message,
@@ -185,11 +190,20 @@ export function useSignup() {
         navigate('/onboarding');
       }
     },
-    onError: (error: Error) => {
+    onError: (error: Error & { status?: number }) => {
       let message = 'Failed to create account';
-      if (error.message.includes('409')) {
-        message = 'Email already registered';
+
+      // Check status code if available
+      if ((error as any).status === 409) {
+        message = error.message || 'Email or username already registered';
+      } else if ((error as any).status === 400) {
+        message = error.message || 'Invalid signup data';
+      } else if ((error as any).status === 500) {
+        message = 'Server error. Please try again later.';
+      } else {
+        message = error.message || 'Failed to create account';
       }
+
       pushToast({
         title: 'Signup Failed',
         description: message,
@@ -281,11 +295,18 @@ export function useResetPassword() {
       });
       navigate('/welcome');
     },
-    onError: (error: Error) => {
+    onError: (error: Error & { status?: number }) => {
       let message = 'Failed to reset password';
-      if (error.message.includes('400')) {
-        message = 'Invalid or expired reset token';
+
+      // Check status code if available
+      if ((error as any).status === 400) {
+        message = error.message || 'Invalid or expired reset token';
+      } else if ((error as any).status === 500) {
+        message = 'Server error. Please try again later.';
+      } else {
+        message = error.message || 'Failed to reset password';
       }
+
       pushToast({
         title: 'Reset Failed',
         description: message,

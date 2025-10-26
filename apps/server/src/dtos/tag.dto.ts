@@ -28,11 +28,18 @@ export const TagSearchSchema = z.object({
   query: z.string().min(1, "Query must be at least 1 character"),
 });
 
+// Popular tags schema
+export const PopularTagsSchema = z.object({
+  limit: z.coerce.number().min(1).max(100).optional().default(30),
+  fillRandom: z.coerce.boolean().optional().default(true),
+});
+
 // Types
 export type CreateTagDto = z.infer<typeof CreateTagSchema>;
 export type UpdateTagDto = z.infer<typeof UpdateTagSchema>;
 export type TagQueryDto = z.infer<typeof TagQuerySchema>;
 export type TagSearchDto = z.infer<typeof TagSearchSchema>;
+export type PopularTagsDto = z.infer<typeof PopularTagsSchema>;
 
 // Response types
 export interface TagResponse {
@@ -47,4 +54,11 @@ export interface TagListResponse {
   tags: TagResponse[];
   nextCursor?: string;
   hasMore: boolean;
+}
+
+export interface PopularTagResponse {
+  _id: string;
+  slug: string;
+  label: string;
+  usersCount: number;
 }

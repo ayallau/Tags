@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LoginFormEmail } from '../features/auth/LoginFormEmail';
 import { SignupForm } from '../features/auth/SignupForm';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo_128.png';
 import { useAuthStore } from '../state/authStore';
 
 type AuthMode = 'login' | 'signup';

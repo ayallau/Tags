@@ -102,3 +102,11 @@ export interface DiscoverUsersQuery {
   cursor?: string;
   limit?: number;
 }
+
+// Recent users query DTO - exported for use in controllers
+export const RecentUsersSchema = z.object({
+  limit: z.coerce.number().min(1).max(100).optional().default(24),
+  cursor: z.string().optional(),
+});
+
+export type RecentUsersDto = z.infer<typeof RecentUsersSchema>;

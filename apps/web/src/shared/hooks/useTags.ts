@@ -17,6 +17,7 @@ export const tagKeys = {
   detail: (id: string) => [...tagKeys.details(), id] as const,
   searches: () => [...tagKeys.all, 'search'] as const,
   search: (query: string) => [...tagKeys.searches(), query] as const,
+  popular: (params: Record<string, unknown>) => [...tagKeys.all, 'popular', params] as const,
 };
 
 /**
@@ -110,5 +111,35 @@ export function useDeleteTag() {
       // Invalidate all tag queries
       queryClient.invalidateQueries({ queryKey: tagKeys.all });
     },
+  });
+}
+
+/**
+ * Popular tag response interface
+ */
+export interface PopularTag {
+  _id: string;
+  slug: string;
+  label: string;
+  usersCount: number;
+}
+
+/**
+ * Hook to get popular tags
+ */
+export function usePopularTags(params: { limit?: number; fillRandom?: boolean }) {
+  return useQuery<PopularTag[]>({
+    queryKey: tagKeys.popular(params),
+    queryFn: async () => {
+      const searchParams = new URLSearchParams();
+      if (params.limit) searchParams.append('limit', params.limit.toString());
+      if (params.fillRandom) searchParams.append('fillRandom', params.fillRandom.toString());
+
+      const queryString = searchParams.toString();
+      const endpoint = `/tags/popular${queryString ? `?${queryString}` : ''}`;
+
+      return api.get<PopularTag[]>(endpoint);
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes - popular tags don't change often
   });
 }

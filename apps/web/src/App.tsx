@@ -4,6 +4,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { PageSkeleton } from './components/skeletons';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { PublicOnlyRoute } from './components/auth/PublicOnlyRoute';
+import { ToastContainer } from './components/ui/toast';
 import {
   HomePage,
   DiscoverPage,
@@ -46,13 +47,15 @@ function App() {
             }
           />
 
-          {/* Root redirect - show welcome for guests, discover for users */}
+          {/* Root - Home page for authenticated users */}
           <Route
             index
             element={
-              <Suspense fallback={<PageSkeleton />}>
-                <HomePage />
-              </Suspense>
+              <ProtectedRoute>
+                <Suspense fallback={<PageSkeleton />}>
+                  <HomePage />
+                </Suspense>
+              </ProtectedRoute>
             }
           />
 
@@ -141,6 +144,7 @@ function App() {
           />
         </Route>
       </Routes>
+      <ToastContainer />
     </Router>
   );
 }
