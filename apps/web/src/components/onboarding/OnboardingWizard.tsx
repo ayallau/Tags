@@ -189,7 +189,7 @@ export function OnboardingWizard() {
       clearOnboardingStorage();
 
       // Navigate to home page
-      navigate('/discover');
+      navigate('/');
     } catch (error) {
       // Log error but still navigate
       // eslint-disable-next-line no-console
@@ -200,7 +200,7 @@ export function OnboardingWizard() {
       clearOnboardingStorage();
 
       // Even if save fails, navigate to home
-      navigate('/discover');
+      navigate('/');
     }
   };
 
