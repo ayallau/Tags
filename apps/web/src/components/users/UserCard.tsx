@@ -3,11 +3,12 @@
  * Displays a single user's preview in Discover/Matches lists
  */
 
-import { User as UserIcon, Bookmark, UserPlus, UserMinus } from 'lucide-react';
+import { User as UserIcon, Bookmark, UserPlus, UserMinus, Shield, EyeOff } from 'lucide-react';
 import { TagPill } from '../tags/TagPill';
 import { Button } from '../ui/button';
 import { useAddBookmark } from '../../shared/hooks/useBookmarks';
 import { useAddFriend, useRemoveFriend, useCheckFriend } from '../../shared/hooks/useFriends';
+import { useBlockUser, useHideUser } from '../../shared/hooks/useSettings';
 import { useState, useEffect } from 'react';
 import type { UserPreview } from '../../shared/types/user';
 
@@ -16,6 +17,8 @@ interface UserCardProps {
   className?: string;
   showBookmarkButton?: boolean;
   showFriendButton?: boolean;
+  showBlockButton?: boolean;
+  showHideButton?: boolean;
 }
 
 export function UserCard({
@@ -23,6 +26,8 @@ export function UserCard({
   className = '',
   showBookmarkButton = false,
   showFriendButton = false,
+  showBlockButton = false,
+  showHideButton = false,
 }: UserCardProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
@@ -32,6 +37,8 @@ export function UserCard({
   const addBookmarkMutation = useAddBookmark();
   const addFriendMutation = useAddFriend();
   const removeFriendMutation = useRemoveFriend();
+  const blockUserMutation = useBlockUser();
+  const hideUserMutation = useHideUser();
 
   // Check if user is friended
   const { data: friendCheckData } = useCheckFriend(showFriendButton ? user._id : undefined);
@@ -88,6 +95,18 @@ export function UserCard({
     }
   };
 
+  const handleBlock = () => {
+    if (window.confirm(`Are you sure you want to block ${user.username}?`)) {
+      blockUserMutation.mutate(user._id);
+    }
+  };
+
+  const handleHide = () => {
+    if (window.confirm(`Are you sure you want to hide ${user.username}?`)) {
+      hideUserMutation.mutate(user._id);
+    }
+  };
+
   return (
     <div className={`border border-border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow ${className}`}>
       {/* Header with avatar and online status */}
@@ -137,6 +156,30 @@ export function UserCard({
               aria-label={isFriended ? 'Remove friend' : 'Add friend'}
             >
               {isFriended ? <UserMinus className='h-4 w-4 text-destructive' /> : <UserPlus className='h-4 w-4' />}
+            </Button>
+          )}
+          {showBlockButton && (
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleBlock}
+              disabled={blockUserMutation.isPending}
+              className='flex-shrink-0'
+              aria-label='Block user'
+            >
+              <Shield className='h-4 w-4 text-destructive' />
+            </Button>
+          )}
+          {showHideButton && (
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleHide}
+              disabled={hideUserMutation.isPending}
+              className='flex-shrink-0'
+              aria-label='Hide user'
+            >
+              <EyeOff className='h-4 w-4' />
             </Button>
           )}
         </div>

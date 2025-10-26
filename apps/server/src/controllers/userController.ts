@@ -4,6 +4,7 @@ import type { IUser } from "../models/User.js";
 import type { UpdateUserDto, DiscoverUsersQuery } from "../dtos/user.dto.js";
 import { UpdateProfileSchema } from "../dtos/user.dto.js";
 import { discoverUsers as discoverUsersService } from "../services/userService.js";
+import { Types } from "mongoose";
 
 /**
  * Get current user profile
@@ -135,7 +136,11 @@ export async function handleDiscoverUsers(
   next: NextFunction
 ): Promise<void> {
   try {
-    const result = await discoverUsersService(req.query);
+    // Get current user ID if authenticated (for privacy filtering)
+    const currentUserId = req.user
+      ? new Types.ObjectId(String((req.user as IUser)._id))
+      : undefined;
+    const result = await discoverUsersService(req.query, currentUserId);
     res.json(result);
   } catch (err) {
     next(err);

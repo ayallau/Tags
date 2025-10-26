@@ -30,3 +30,10 @@ export type {
   UpdateBookmarkDto,
   BookmarkQueryDto,
 } from "./bookmark.dto.js";
+
+export type {
+  SettingsListQuery,
+  TargetUserIdDto,
+  SettingsUserItem,
+  SettingsListResponse,
+} from "./settings.dto.js";

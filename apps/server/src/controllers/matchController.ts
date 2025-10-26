@@ -4,6 +4,7 @@ import MatchScoreModel from "../models/MatchScore.js";
 import UserModel from "../models/User.js";
 import { Types } from "mongoose";
 import type { IUser } from "../models/User.js";
+import { buildPrivacyFilter } from "../services/settingsService.js";
 
 /**
  * Get matches for the current user
@@ -95,10 +96,19 @@ export async function getMatches(
     // Extract target user IDs
     const targetUserIds = results.map((match) => match.targetUserId);
 
-    // Fetch users with populated tags
-    const targetUsers = await UserModel.find({
+    // Build user query with privacy filter
+    const userQuery: Record<string, any> = {
       _id: { $in: targetUserIds },
-    })
+    };
+
+    // Apply privacy filter (exclude blocked/hidden users)
+    const privacyFilter = await buildPrivacyFilter(
+      new Types.ObjectId(String(user._id))
+    );
+    Object.assign(userQuery, privacyFilter);
+
+    // Fetch users with populated tags
+    const targetUsers = await UserModel.find(userQuery)
       .select("_id username avatarUrl isOnline lastVisitAt tags")
       .populate("tags", "slug label");
 

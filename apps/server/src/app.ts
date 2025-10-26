@@ -11,6 +11,7 @@ import userRoutes from "./routes/user.routes.js";
 import tagRoutes from "./routes/tag.routes.js";
 import bookmarkRoutes from "./routes/bookmark.routes.js";
 import friendRoutes from "./routes/friend.routes.js";
+import settingsRoutes from "./routes/settings.routes.js";
 import config from "./config.js";
 import mongoose from "mongoose";
 import path from "node:path";
@@ -187,6 +188,7 @@ app.use("/users", userRoutes);
 app.use("/tags", tagRoutes);
 app.use("/bookmarks", bookmarkRoutes);
 app.use("/friends", friendRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // Example protected route
 import { requireAuth } from "./middlewares/requireAuth.js";

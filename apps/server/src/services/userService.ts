@@ -5,6 +5,7 @@ import type {
   DiscoverUsersQuery,
 } from "../dtos/index.js";
 import { Types } from "mongoose";
+import { buildPrivacyFilter } from "./settingsService.js";
 
 export async function findByEmailLower(email: string): Promise<IUser | null> {
   return await User.findOne({ emailLower: email.toLowerCase() });
@@ -57,8 +58,12 @@ export async function upsertGoogleUser({
 
 /**
  * Discover users based on tags, search query, and sorting options
+ * Excludes blocked and hidden users
  */
-export async function discoverUsers(params: DiscoverUsersQuery) {
+export async function discoverUsers(
+  params: DiscoverUsersQuery,
+  currentUserId?: Types.ObjectId
+) {
   const { tags, query, sort = "relevance", cursor, limit = 24 } = params;
 
   // Build filter query
@@ -81,6 +86,12 @@ export async function discoverUsers(params: DiscoverUsersQuery) {
   // Cursor-based pagination
   if (cursor && Types.ObjectId.isValid(cursor)) {
     filter._id = { $gt: cursor };
+  }
+
+  // Apply privacy filter (exclude blocked/hidden users)
+  if (currentUserId) {
+    const privacyFilter = await buildPrivacyFilter(currentUserId);
+    Object.assign(filter, privacyFilter);
   }
 
   // Build sort options
