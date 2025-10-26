@@ -37,6 +37,15 @@ try {
 try {
   await mongoose.connect(config.MONGO_URI);
   logger.info("MongoDB connected");
+
+  // Import models to register them and validate
+  const { checkModelsRegistered, validateSchemas } = await import(
+    "./models/index.js"
+  );
+  checkModelsRegistered();
+  await validateSchemas();
+
+  logger.info("✓ All database models initialized");
 } catch (err) {
   logger.error(
     "MongoDB connection error",
@@ -162,7 +171,7 @@ app.get("/version", versionHandler);
 app.use("/auth", authRoutes);
 
 // Example protected route
-import { requireAuth } from "./middleware/requireAuth.js";
+import { requireAuth } from "./middlewares/requireAuth.js";
 
 const meHandler: RequestHandler = (req, res): void => {
   if (!req.user) {
