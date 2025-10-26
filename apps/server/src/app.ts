@@ -7,6 +7,7 @@ import cors, { type CorsOptions } from "cors";
 import cookieParser from "cookie-parser";
 import passport from "./services/passport.js";
 import authRoutes from "./routes/auth.routes.js";
+import tagRoutes from "./routes/tag.routes.js";
 import config from "./config.js";
 import mongoose from "mongoose";
 import path from "node:path";
@@ -55,7 +56,8 @@ try {
   process.exit(1);
 }
 
-const app = express();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const app: any = express();
 
 // Security headers - Helmet
 if (config.SSL_ENABLED) {
@@ -80,7 +82,11 @@ if (config.SSL_ENABLED) {
 
 // Request ID middleware (must be first after security)
 app.use(
-  (req: Request & { requestId?: string; startTime?: number }, _res, next) => {
+  (
+    req: Request & { requestId?: string; startTime?: number },
+    _res: any,
+    next: any
+  ) => {
     req.requestId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     req.startTime = Date.now();
     next();
@@ -90,7 +96,11 @@ app.use(
 // Request logging middleware (dev only)
 if (process.env.NODE_ENV === "development") {
   app.use(
-    (req: Request & { requestId?: string; startTime?: number }, _res, next) => {
+    (
+      req: Request & { requestId?: string; startTime?: number },
+      _res: any,
+      next: any
+    ) => {
       logger.debug(`→ ${req.method} ${req.originalUrl}`, {
         requestId: req.requestId,
       });
@@ -120,7 +130,7 @@ app.use(
   (
     req: Request & { requestId?: string; startTime?: number },
     res: ExpressResponse,
-    next
+    next: any
   ) => {
     const startTime = req.startTime || Date.now();
 
@@ -170,6 +180,7 @@ const versionHandler: RequestHandler = (_req, res): void => {
 app.get("/version", versionHandler);
 
 app.use("/auth", authRoutes);
+app.use("/tags", tagRoutes);
 
 // Example protected route
 import { requireAuth } from "./middlewares/requireAuth.js";

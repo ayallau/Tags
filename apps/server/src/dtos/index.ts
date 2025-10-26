@@ -25,3 +25,21 @@ export type {
 
 export { toUserDto } from "./user.dto.js";
 
+// ========================================
+// Tag DTOs
+// ========================================
+export type {
+  CreateTagDto,
+  UpdateTagDto,
+  TagQueryDto,
+  TagSearchDto,
+  TagResponse,
+  TagListResponse,
+} from "./tag.dto.js";
+
+export {
+  CreateTagSchema,
+  UpdateTagSchema,
+  TagQuerySchema,
+  TagSearchSchema,
+} from "./tag.dto.js";
