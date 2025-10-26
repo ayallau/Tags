@@ -8,6 +8,7 @@ export const FriendsPage = lazy(() => import('../pages/FriendsPage'));
 export const ChatPage = lazy(() => import('../pages/ChatPage'));
 export const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 export const SettingsPage = lazy(() => import('../pages/SettingsPage'));
+export const OnboardingPage = lazy(() => import('../pages/OnboardingPage'));
 
 // Route configuration type
 export interface RouteConfig {
@@ -21,36 +22,41 @@ export const routes: RouteConfig[] = [
   {
     path: '/',
     component: HomePage,
-    title: 'Home'
+    title: 'Home',
+  },
+  {
+    path: '/onboarding',
+    component: OnboardingPage,
+    title: 'Onboarding',
   },
   {
     path: '/discover',
     component: DiscoverPage,
-    title: 'Discover'
+    title: 'Discover',
   },
   {
     path: '/matches',
     component: MatchesPage,
-    title: 'Matches'
+    title: 'Matches',
   },
   {
     path: '/friends',
     component: FriendsPage,
-    title: 'Friends'
+    title: 'Friends',
   },
   {
     path: '/chat',
     component: ChatPage,
-    title: 'Chat'
+    title: 'Chat',
   },
   {
     path: '/profile',
     component: ProfilePage,
-    title: 'Profile'
+    title: 'Profile',
   },
   {
     path: '/settings',
     component: SettingsPage,
-    title: 'Settings'
-  }
+    title: 'Settings',
+  },
 ];

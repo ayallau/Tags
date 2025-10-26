@@ -39,8 +39,11 @@ export interface CreateUserDto {
 }
 
 export interface UpdateUserDto {
-  email?: string;
-  // Additional fields that can be updated
+  username?: string;
+  bio?: string;
+  location?: string;
+  photos?: string[];
+  tags?: string[];
 }
 
 export interface GoogleUserDto {

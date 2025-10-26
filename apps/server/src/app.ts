@@ -7,6 +7,7 @@ import cors, { type CorsOptions } from "cors";
 import cookieParser from "cookie-parser";
 import passport from "./services/passport.js";
 import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
 import tagRoutes from "./routes/tag.routes.js";
 import config from "./config.js";
 import mongoose from "mongoose";
@@ -180,6 +181,7 @@ const versionHandler: RequestHandler = (_req, res): void => {
 app.get("/version", versionHandler);
 
 app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
 app.use("/tags", tagRoutes);
 
 // Example protected route
