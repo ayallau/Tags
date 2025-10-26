@@ -27,6 +27,10 @@ import type {
 } from "../dtos/index.js";
 import type { IUser } from "../models/User.js";
 import type { Types } from "mongoose";
+import {
+  getAuthCookieOptionsAuto,
+  getAuthClearCookieOptionsAuto,
+} from "../lib/cookies.js";
 
 export async function loginWithEmail(
   req: Request<Record<string, never>, AuthResponseDto, LoginDto>,
@@ -45,15 +49,7 @@ export async function loginWithEmail(
     const refreshToken = createRefreshToken(user);
 
     // Set refresh token in HttpOnly cookie
-    res.cookie("tags_refresh_token", refreshToken, {
-      httpOnly: true,
-      secure:
-        process.env.NODE_ENV === "production" ||
-        process.env.SSL_ENABLED === "true",
-      sameSite: "strict",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      path: "/",
-    });
+    res.cookie("tags_refresh_token", refreshToken, getAuthCookieOptionsAuto());
 
     return res.json({ accessToken });
   } catch (err) {
@@ -312,15 +308,11 @@ export async function refreshToken(
     const newRefreshToken = createRefreshToken(user);
 
     // Update refresh token in cookie
-    res.cookie("tags_refresh_token", newRefreshToken, {
-      httpOnly: true,
-      secure:
-        process.env.NODE_ENV === "production" ||
-        process.env.SSL_ENABLED === "true",
-      sameSite: "strict",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      path: "/",
-    });
+    res.cookie(
+      "tags_refresh_token",
+      newRefreshToken,
+      getAuthCookieOptionsAuto()
+    );
 
     return res.json({ accessToken: newAccessToken });
   } catch (err) {
@@ -368,14 +360,7 @@ export async function globalLogout(
     });
 
     // Clear refresh token from cookies
-    res.clearCookie("tags_refresh_token", {
-      httpOnly: true,
-      secure:
-        process.env.NODE_ENV === "production" ||
-        process.env.SSL_ENABLED === "true",
-      sameSite: "strict",
-      path: "/",
-    });
+    res.clearCookie("tags_refresh_token", getAuthClearCookieOptionsAuto());
 
     console.log(
       `[${new Date().toISOString()}] Global logout for user ${String(user._id)} - tokenVersion incremented`

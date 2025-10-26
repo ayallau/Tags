@@ -15,6 +15,7 @@ import {
   logout,
   globalLogout,
 } from "../controllers/authController.js";
+import { getAuthCookieOptionsAuto } from "../lib/cookies.js";
 
 const router: Router = Router();
 
@@ -114,15 +115,11 @@ router.get(
 
       // Set refresh token in HttpOnly cookie
       if (result.refreshToken) {
-        res.cookie("tags_refresh_token", result.refreshToken, {
-          httpOnly: true,
-          secure:
-            process.env.NODE_ENV === "production" ||
-            process.env.SSL_ENABLED === "true",
-          sameSite: "strict",
-          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-          path: "/",
-        });
+        res.cookie(
+          "tags_refresh_token",
+          result.refreshToken,
+          getAuthCookieOptionsAuto()
+        );
       }
 
       res.json({ accessToken: result.accessToken });
