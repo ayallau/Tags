@@ -6,7 +6,9 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { useSearchTags, useCreateTag } from '../../shared/hooks/useTags';
+import { useQueryClient } from '@tanstack/react-query';
+import { ChevronDown } from 'lucide-react';
+import { useSearchTags, useCreateTag, usePopularTags, tagKeys } from '../../shared/hooks/useTags';
 import type { Tag } from '../../shared/types/tag';
 
 interface TagPickerProps {
@@ -31,22 +33,46 @@ export function TagPicker({
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const { data: suggestions = [], isLoading } = useSearchTags(query);
+  const queryClient = useQueryClient();
+
+  const { data: suggestions = [], isLoading: isLoadingSearch } = useSearchTags(query);
+  const { data: popularTags = [], isLoading: isLoadingPopular } = usePopularTags({ limit: 50, fillRandom: true });
   const createTagMutation = useCreateTag();
+
+  // Show popular tags when query is empty or very short
+  const showPopularTags = query.length < 2;
+  const isLoading = showPopularTags ? isLoadingPopular : isLoadingSearch;
 
   // Filter out already selected tags
   const availableSuggestions = suggestions.filter(tag => !selectedTags.some(selected => selected._id === tag._id));
 
+  // For popular tags, convert to Tag format and filter
+  // Only show top 5 that are not already selected
+  const availablePopularTags = popularTags
+    .filter(tag => !selectedTags.some(selected => selected._id === tag._id))
+    .slice(0, 5)
+    .map(tag => ({
+      _id: tag._id,
+      slug: tag.slug,
+      label: tag.label,
+      createdAt: '',
+      updatedAt: '',
+    }));
+
   // Check if we can create a new tag
   const canCreateNewTag = allowCreate && query.length >= 2 && !isLoading && availableSuggestions.length === 0;
 
-  const totalItems = canCreateNewTag ? 1 : availableSuggestions.length;
+  // Determine which suggestions to show
+  const displaySuggestions = showPopularTags ? availablePopularTags : availableSuggestions;
+  const totalItems = canCreateNewTag ? 1 : displaySuggestions.length;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    setIsOpen(value.length >= 2);
+    // Keep dropdown open if there's a query or we're showing popular tags
+    setIsOpen(true);
   };
 
   const handleSelect = (tag: Tag) => {
@@ -54,6 +80,12 @@ export function TagPicker({
     setQuery('');
     setIsOpen(false);
     setFocusedIndex(-1);
+
+    // Refetch popular tags to get fresh suggestions after selection
+    queryClient.invalidateQueries({
+      queryKey: tagKeys.popular({ limit: 50, fillRandom: true }),
+    });
+
     inputRef.current?.focus();
   };
 
@@ -92,8 +124,8 @@ export function TagPicker({
           if (focusedIndex === 0 && canCreateNewTag) {
             // Create new tag
             handleCreateNewTag();
-          } else if (focusedIndex >= 0 && availableSuggestions[focusedIndex]) {
-            handleSelect(availableSuggestions[focusedIndex]);
+          } else if (focusedIndex >= 0 && displaySuggestions[focusedIndex]) {
+            handleSelect(displaySuggestions[focusedIndex]);
           }
           break;
         case 'Escape':
@@ -108,7 +140,7 @@ export function TagPicker({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
     isOpen,
-    availableSuggestions,
+    displaySuggestions,
     focusedIndex,
     onSelect,
     canCreateNewTag,
@@ -117,16 +149,22 @@ export function TagPicker({
     handleSelect,
   ]);
 
+  const handleToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
   const handleFocus = () => {
-    if (query.length >= 2) {
-      setIsOpen(true);
-    }
+    // Don't open automatically - user must click the button
   };
 
   const handleBlur = () => {
-    // Delay to allow click on suggestion
+    // Delay to allow click on suggestion or button
     setTimeout(() => {
-      if (!listRef.current?.contains(document.activeElement)) {
+      const activeElement = document.activeElement;
+      const isClickingSuggestion = listRef.current?.contains(activeElement);
+      const isClickingButton = buttonRef.current?.contains(activeElement);
+
+      if (!isClickingSuggestion && !isClickingButton) {
         setIsOpen(false);
       }
     }, 200);
@@ -134,23 +172,39 @@ export function TagPicker({
 
   return (
     <div className={`relative ${className}`}>
-      <input
-        ref={inputRef}
-        type='text'
-        value={query}
-        onChange={handleInputChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        disabled={disabled}
-        className='w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white'
-        role='combobox'
-        aria-expanded={isOpen}
-        aria-autocomplete='list'
-        aria-controls='tag-suggestions'
-      />
+      <div className='relative'>
+        <input
+          ref={inputRef}
+          type='text'
+          value={query}
+          onChange={handleInputChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          placeholder={placeholder}
+          disabled={disabled}
+          className='w-full px-4 py-2 pr-10 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white'
+          role='combobox'
+          aria-expanded={isOpen}
+          aria-autocomplete='list'
+          aria-controls='tag-suggestions'
+        />
+        <button
+          ref={buttonRef}
+          type='button'
+          onClick={handleToggle}
+          disabled={disabled}
+          className='absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          aria-label='Toggle suggestions'
+          aria-expanded={isOpen}
+        >
+          <ChevronDown
+            size={20}
+            className={`transition-transform ${isOpen ? 'rotate-180' : ''} text-gray-500 dark:text-gray-400`}
+          />
+        </button>
+      </div>
 
-      {isOpen && query.length >= 2 && (
+      {isOpen && (
         <ul
           ref={listRef}
           id='tag-suggestions'
@@ -159,7 +213,7 @@ export function TagPicker({
         >
           {isLoading ? (
             <li className='px-4 py-2 text-gray-500 dark:text-gray-400' role='status'>
-              Searching...
+              {showPopularTags ? 'Loading popular tags...' : 'Searching...'}
             </li>
           ) : canCreateNewTag ? (
             <li
@@ -178,13 +232,18 @@ export function TagPicker({
               </span>
               {createTagMutation.isPending && <span className='ml-auto text-sm text-gray-500'>Creating...</span>}
             </li>
-          ) : availableSuggestions.length === 0 ? (
+          ) : displaySuggestions.length === 0 ? (
             <li className='px-4 py-2 text-gray-500 dark:text-gray-400' role='status'>
-              No tags found
+              {showPopularTags ? 'No popular tags available' : 'No tags found'}
             </li>
           ) : (
             <>
-              {availableSuggestions.map((tag, index) => (
+              {showPopularTags && (
+                <li className='px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700'>
+                  Popular Tags
+                </li>
+              )}
+              {displaySuggestions.map((tag, index) => (
                 <li
                   key={tag._id}
                   className={`
@@ -201,17 +260,17 @@ export function TagPicker({
                   {tag.label}
                 </li>
               ))}
-              {allowCreate && (
+              {allowCreate && !showPopularTags && (
                 <li
                   className={`
                     px-4 py-2 cursor-pointer transition-colors flex items-center gap-2
                     border-t border-gray-300 dark:border-gray-700
-                    ${focusedIndex === availableSuggestions.length ? 'bg-blue-100 dark:bg-blue-900/30' : ''}
+                    ${focusedIndex === displaySuggestions.length ? 'bg-blue-100 dark:bg-blue-900/30' : ''}
                     hover:bg-gray-100 dark:hover:bg-gray-700
                   `}
                   onClick={handleCreateNewTag}
                   role='option'
-                  aria-selected={focusedIndex === availableSuggestions.length}
+                  aria-selected={focusedIndex === displaySuggestions.length}
                 >
                   <span className='text-blue-600 dark:text-blue-400'>+</span>
                   <span>

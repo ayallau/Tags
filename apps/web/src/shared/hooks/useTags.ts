@@ -140,6 +140,7 @@ export function usePopularTags(params: { limit?: number; fillRandom?: boolean })
 
       return api.get<PopularTag[]>(endpoint);
     },
-    staleTime: 10 * 60 * 1000, // 10 minutes - popular tags don't change often
+    staleTime: 0, // Always refetch to get fresh suggestions after selections
+    refetchOnMount: true,
   });
 }
