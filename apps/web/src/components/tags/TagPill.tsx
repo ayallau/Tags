@@ -14,6 +14,7 @@ interface TagPillProps {
   className?: string;
   isClickable?: boolean;
   onClick?: () => void;
+  isSelected?: boolean;
 }
 
 export function TagPill({
@@ -23,6 +24,7 @@ export function TagPill({
   className = '',
   isClickable = false,
   onClick,
+  isSelected = false,
 }: TagPillProps) {
   const isRemovable = state === 'removable' && onRemove;
 
@@ -37,7 +39,10 @@ export function TagPill({
     ${className}
   `;
 
-  const clickableClasses = isClickable || onClick ? 'hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer' : '';
+  // If selected, show active state (hover colors as background)
+  const selectedClasses = isSelected ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-200 dark:hover:bg-gray-700';
+
+  const clickableClasses = isClickable || onClick ? `${selectedClasses} cursor-pointer` : '';
 
   const content = (
     <>

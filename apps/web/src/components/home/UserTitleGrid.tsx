@@ -128,7 +128,7 @@ export function UserTitleGrid({ className = '', selectedTagId }: UserTitleGridPr
   }
 
   if (!allUsers.length && !isLoading) {
-    const title = selectedTagId ? 'No Users Found' : 'No Recent Users';
+    const title = selectedTagId ? '' : 'No Recent Users';
     const description = selectedTagId
       ? 'There are no users with this tag. Try selecting a different tag.'
       : 'There are no active users at the moment. Check back later!';

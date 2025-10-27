@@ -24,17 +24,18 @@ export default function HomePage() {
             <h1 className='text-3xl font-bold text-foreground mb-2'>Trending Tags</h1>
             <p className='text-muted-foreground text-sm'>Discover the most popular tags</p>
           </div>
-          <PopularTagsGrid onTagClick={handleTagClick} />
+          <PopularTagsGrid onTagClick={handleTagClick} selectedTagId={selectedTagId} />
         </section>
 
         {/* Recent Users Section */}
         <section className='space-y-6'>
           <div className='text-center'>
-            <h1 className='text-3xl font-bold text-foreground mb-2'>
+            {/* <h1 className='text-3xl font-bold text-foreground mb-2'>
               {selectedTagId ? 'Filtered Users' : 'Recently Active Users'}
-            </h1>
+            </h1> */}
+            <h2 className='text-2xl font-bold text-foreground mb-2'>Get to know our community</h2>
             <p className='text-muted-foreground text-sm'>
-              {selectedTagId ? 'Users who share this tag with you' : 'Connect with users who share your interests'}
+              {selectedTagId ? 'People who like {selectedTag}' : 'Connect with people who share your interests'}
             </p>
           </div>
           <UserTitleGrid selectedTagId={selectedTagId} />
