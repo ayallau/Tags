@@ -25,7 +25,7 @@ export function PopularTagsGrid({ className = '' }: PopularTagsGridProps) {
 
   if (isLoading) {
     return (
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3'>
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 justify-items-center'>
         {Array.from({ length: 12 }).map((_, i) => (
           <TileSkeleton key={i} />
         ))}
@@ -44,7 +44,7 @@ export function PopularTagsGrid({ className = '' }: PopularTagsGridProps) {
 
   return (
     <div className={className}>
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3'>
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 justify-items-center'>
         {tags.map(tag => (
           <TagPill
             key={tag._id}

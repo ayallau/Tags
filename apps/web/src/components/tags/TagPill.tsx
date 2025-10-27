@@ -31,7 +31,7 @@ export function TagPill({ tag, state = 'existing', onRemove, className = '' }: T
       role='listitem'
       aria-label={`Tag: ${tag.label}`}
     >
-      <span>{tag.label}</span>
+      <span>&lt; {tag.label} &gt;</span>
       {isRemovable && (
         <button
           onClick={onRemove}
