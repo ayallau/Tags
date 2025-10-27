@@ -10,9 +10,10 @@ import { TileSkeleton } from '../skeletons';
 
 interface PopularTagsGridProps {
   className?: string;
+  onTagClick?: (tagId: string) => void;
 }
 
-export function PopularTagsGrid({ className = '' }: PopularTagsGridProps) {
+export function PopularTagsGrid({ className = '', onTagClick }: PopularTagsGridProps) {
   const { data: tags, isLoading, error } = usePopularTags({ limit: 30, fillRandom: true });
 
   if (error) {
@@ -56,6 +57,7 @@ export function PopularTagsGrid({ className = '' }: PopularTagsGridProps) {
               updatedAt: '',
             }}
             state='existing'
+            onClick={() => onTagClick?.(tag._id)}
           />
         ))}
       </div>

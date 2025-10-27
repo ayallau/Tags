@@ -60,8 +60,9 @@ export function TagManagement({ currentTagIds = [], className = '' }: TagManagem
       await updateMutation.mutateAsync({ tags: tagIds });
     } catch (error) {
       console.error('Failed to update tags:', error);
-      // Revert on error
-      setSelectedTagIds(currentTagIds);
+      // Revert on error - normalize first
+      const normalized = currentTagIds.map(id => (typeof id === 'string' ? id : id._id));
+      setSelectedTagIds(normalized);
     }
   };
 

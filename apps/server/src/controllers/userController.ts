@@ -103,10 +103,10 @@ export async function updateCurrentUser(
       updateFields.avatarUrl =
         updateData.avatarUrl === "" ? undefined : updateData.avatarUrl;
     if (updateData.tags !== undefined) {
-      // Convert tag IDs to ObjectIds
+      // Convert tag IDs to ObjectIds for Mongoose
       updateFields.tags = updateData.tags.map(
         (tagId) => new Types.ObjectId(tagId)
-      );
+      ) as any;
     }
     if (updateData.isOnboardingComplete !== undefined)
       updateFields.isOnboardingComplete = updateData.isOnboardingComplete;

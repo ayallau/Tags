@@ -5,16 +5,19 @@
 
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useDiscoverUsers } from '../../shared/hooks/useDiscoverUsers';
 import { useRecentUsers, type RecentUser } from '../../shared/hooks/useRecentUsers';
 import { EmptyState } from '../data/EmptyState';
 import { User as UserIcon } from 'lucide-react';
 import { TileSkeleton } from '../skeletons';
+import type { UserPreview } from '../../shared/types/user';
 
 interface UserTitleGridProps {
   className?: string;
+  selectedTagId?: string | undefined;
 }
 
-function UserTitleCard({ user }: { user: RecentUser }) {
+function UserTitleCard({ user }: { user: RecentUser | UserPreview }) {
   return (
     <Link
       to={`/profile/${user._id}`}
@@ -55,22 +58,38 @@ function UserTitleCard({ user }: { user: RecentUser }) {
   );
 }
 
-export function UserTitleGrid({ className = '' }: UserTitleGridProps) {
+export function UserTitleGrid({ className = '', selectedTagId }: UserTitleGridProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const { data, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } = useRecentUsers({ limit: 24 });
+
+  // Use discover users if a tag is selected, otherwise use recent users
+  const discoverQuery = useDiscoverUsers({
+    tags: selectedTagId,
+    limit: 24,
+  });
+
+  const recentQuery = useRecentUsers({ limit: 24 });
+
+  // Select which query to use based on whether a tag is selected
+  const activeQuery = selectedTagId ? discoverQuery : recentQuery;
+  const { data, isLoading, error, hasNextPage, isFetchingNextPage, fetchNextPage } = activeQuery;
 
   // Flatten all users from pages, filter out invalid entries, and limit to 100
   const totalCap = 100;
-  const allUsers: RecentUser[] =
+  const allUsers: (RecentUser | UserPreview)[] =
     data?.pages
-      .flatMap((page: any) => page.users || [])
-      .filter((user: RecentUser | null | undefined): user is RecentUser => Boolean(user && user._id))
+      .flatMap((page: { users?: (RecentUser | UserPreview)[] }) => page.users || [])
+      .filter((user: RecentUser | UserPreview | null | undefined): user is RecentUser | UserPreview =>
+        Boolean(user && user._id)
+      )
       .slice(0, totalCap) || [];
 
   // Infinite scroll observer
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => {
+    if (typeof window === 'undefined' || !window.IntersectionObserver) return;
+
+    const ObserverConstructor = window.IntersectionObserver;
+    const observer = new ObserverConstructor(
+      (entries: IntersectionObserverEntry[]) => {
         if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
@@ -109,9 +128,12 @@ export function UserTitleGrid({ className = '' }: UserTitleGridProps) {
   }
 
   if (!allUsers.length && !isLoading) {
-    return (
-      <EmptyState title='No Recent Users' description='There are no active users at the moment. Check back later!' />
-    );
+    const title = selectedTagId ? 'No Users Found' : 'No Recent Users';
+    const description = selectedTagId
+      ? 'There are no users with this tag. Try selecting a different tag.'
+      : 'There are no active users at the moment. Check back later!';
+
+    return <EmptyState title={title} description={description} />;
   }
 
   return (
