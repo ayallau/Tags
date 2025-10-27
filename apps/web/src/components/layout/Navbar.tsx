@@ -14,7 +14,10 @@ export function Navbar() {
   const location = useLocation();
 
   return (
-    <nav className='border-b bg-background'>
+    <nav
+      className='border-b border-gray-200 dark:border-gray-700'
+      style={{ backgroundColor: 'hsl(var(--background))' }}
+    >
       <div className='container mx-auto px-4'>
         <div className='flex items-center justify-center gap-1'>
           {navigationItems.map(item => {
@@ -25,10 +28,11 @@ export function Navbar() {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors hover:text-primary',
-                  'border-b-2 border-transparent hover:border-muted-foreground/20',
-                  'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background',
-                  isActive ? 'text-primary border-primary' : 'text-muted-foreground'
+                  'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors rounded-md',
+                  'hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none',
+                  isActive
+                    ? 'text-primary font-semibold bg-gray-100 dark:bg-gray-800'
+                    : 'text-muted-foreground hover:text-foreground'
                 )}
                 aria-current={isActive ? 'page' : undefined}
               >

@@ -85,10 +85,11 @@ export function DropdownMenuContent({ children, align = 'start', className }: Dr
   return (
     <div
       className={cn(
-        'absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
+        'absolute z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-200 dark:border-gray-700 p-1 shadow-md text-foreground',
         align === 'end' ? 'right-0' : 'left-0',
         className
       )}
+      style={{ backgroundColor: 'hsl(var(--background))' }}
       role='menu'
     >
       {children}
@@ -120,7 +121,7 @@ export function DropdownMenuItem({ children, onClick, disabled, asChild, classNa
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       className: cn(
-        'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50',
+        'relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-2.5 text-sm outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus:bg-gray-100 dark:focus:bg-gray-800 disabled:pointer-events-none disabled:opacity-50',
         className
       ),
       onClick: handleClick,
@@ -130,7 +131,7 @@ export function DropdownMenuItem({ children, onClick, disabled, asChild, classNa
   return (
     <div
       className={cn(
-        'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50',
+        'relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-2.5 text-sm outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus:bg-gray-100 dark:focus:bg-gray-800 disabled:pointer-events-none disabled:opacity-50',
         className
       )}
       onClick={handleClick}
@@ -142,5 +143,5 @@ export function DropdownMenuItem({ children, onClick, disabled, asChild, classNa
 }
 
 export function DropdownMenuSeparator({ className }: { className?: string }) {
-  return <div className={cn('-mx-1 my-1 h-px bg-muted', className)} />;
+  return <div className={cn('-mx-1 my-2 h-px bg-gray-300 dark:bg-gray-700', className)} />;
 }

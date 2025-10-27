@@ -7,14 +7,18 @@ export default function HomePage() {
     <ProtectedRoute>
       <div className='space-y-8'>
         {/* Popular Tags Section */}
+        <div className='text-center'>
+          <h1 className='text-3xl font-bold text-foreground mb-2'>Trending Tags</h1>
+        </div>
         <section>
-          <h2 className='text-2xl font-bold mb-4'>Trending Tags</h2>
           <PopularTagsGrid />
         </section>
 
         {/* Recent Users Section */}
+        <div className='text-center'>
+          <h1 className='text-3xl font-bold text-foreground mb-2'>Recently Active Users</h1>
+        </div>
         <section>
-          <h2 className='text-2xl font-bold mb-4'>Recently Active Users</h2>
           <UserTitleGrid />
         </section>
       </div>

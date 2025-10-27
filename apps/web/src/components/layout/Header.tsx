@@ -20,13 +20,16 @@ export function Header() {
   };
 
   return (
-    <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60'>
+    <header
+      className='sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700'
+      style={{ backgroundColor: 'hsl(var(--background))' }}
+    >
       <div className='container mx-auto px-4'>
         <div className='flex h-16 items-center justify-between'>
           {/* Left side - Logo and App Name */}
           <Link
-            to={isAuthenticated() ? '/discover' : '/'}
-            className='flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background rounded-md'
+            to='/'
+            className='flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none rounded-md'
           >
             <img src={logo} alt='Tags Logo' className='h-16 w-16' loading='lazy' />
             <h1 className='text-xl font-bold text-foreground'>Tags for Dating</h1>
@@ -63,13 +66,23 @@ export function Header() {
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link to='/profile'>Profile</Link>
+                      <Link to='/profile' className='flex items-center'>
+                        <span aria-hidden='true'>👤</span>
+                        <span>Profile</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to='/settings'>Settings</Link>
+                      <Link to='/settings' className='flex items-center'>
+                        <span aria-hidden='true'>⚙️</span>
+                        <span>Settings</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      disabled={logoutMutation.isPending}
+                      className='text-red-600 dark:text-red-500'
+                    >
                       {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
