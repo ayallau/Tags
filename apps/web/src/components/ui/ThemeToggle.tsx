@@ -1,5 +1,5 @@
 import React from 'react';
-import { Monitor, Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { getThemePreference, setTheme, type Theme } from '@/lib/theme';
 
@@ -8,7 +8,7 @@ interface ThemeToggleProps {
 }
 
 const themeOptions: { value: Theme; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { value: 'system', label: 'System', icon: Monitor },
+  // { value: 'system', label: 'System', icon: Monitor },
   { value: 'light', label: 'Light', icon: Sun },
   { value: 'dark', label: 'Dark', icon: Moon },
 ];
@@ -70,13 +70,14 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
                 type='button'
                 onClick={() => handleThemeChange(option.value)}
                 className={cn(
+                  'relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-3 py-2.5 text-sm outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus:bg-gray-100 dark:focus:bg-gray-800 disabled:pointer-events-none disabled:opacity-50',
                   'w-full flex items-center gap-3 px-3 py-2 text-right',
-                  'hover:bg-surface-hover active:bg-surface-active',
+                  'hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700',
                   'text-foreground',
                   'transition-colors duration-200',
                   'first:rounded-t-md last:rounded-b-md',
-                  'focus-visible:outline-none focus-visible:bg-surface-hover',
-                  isSelected && 'bg-surface-hover'
+                  'focus-visible:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800',
+                  isSelected && 'bg-gray-100 dark:bg-gray-800'
                 )}
                 role='menuitem'
                 aria-checked={isSelected}

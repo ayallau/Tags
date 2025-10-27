@@ -4,7 +4,7 @@
  * Used in Home/Discover pages
  */
 
-import { Heart, UserPlus, MessageCircle } from 'lucide-react';
+import { Heart, Coffee, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { TagPill } from '../tags/TagPill';
@@ -40,9 +40,9 @@ function calculateAge(dateOfBirth?: string): number | null {
 function getGenderAvatar(gender?: string) {
   switch (gender?.toLowerCase()) {
     case 'male':
-      return '👨';
+      return '👦🏻';
     case 'female':
-      return '👩';
+      return '👧🏻';
     case 'other':
       return '👤';
     default:
@@ -80,43 +80,65 @@ export function UserTitleCard({ user, className = '' }: UserTitleCardProps) {
   return (
     <div className={`border border-border rounded-lg bg-card hover:shadow-lg transition-all ${className}`}>
       <div className='p-4 space-y-3'>
-        {/* Header with avatar and basic info */}
-        <div className='flex items-start gap-3'>
-          <div className='relative flex-shrink-0'>
+        {/* Avatar Section - Large centered avatar */}
+        <div className='relative w-full'>
+          <div className='border-2 border-border rounded-lg p-8 bg-muted/30 flex items-center justify-center aspect-square'>
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={user.username}
-                className='h-16 w-16 rounded-full object-cover border-2 border-border'
+                className='w-20 h-20 rounded-full object-cover'
                 loading='lazy'
               />
             ) : (
-              <div className='h-16 w-16 rounded-full bg-muted flex items-center justify-center border-2 border-border'>
-                <span className='text-2xl'>{'gender' in user ? getGenderAvatar(user.gender) : getGenderAvatar()}</span>
+              <div className='w-20 h-20 rounded-full bg-muted flex items-center justify-center border-2 border-border'>
+                <span className='text-4xl'>{'gender' in user ? getGenderAvatar(user.gender) : getGenderAvatar()}</span>
               </div>
             )}
-            {user.isOnline && (
-              <div className='absolute bottom-1 right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-background' />
-            )}
           </div>
-
-          <div className='flex-1 min-w-0'>
-            <h3 className='font-semibold text-base text-foreground truncate' title={user.username}>
-              {user.username || 'Anonymous'}
-            </h3>
-            <div className='flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground'>
-              {'gender' in user && user.gender && <span>{user.gender}</span>}
-              {age !== null && <span>• Age {age}</span>}
-            </div>
-            {'profession' in user && user.profession && (
-              <p className='text-sm text-foreground font-medium mt-0.5'>{user.profession}</p>
-            )}
-            {'title' in user && user.title && <p className='text-xs text-muted-foreground truncate'>{user.title}</p>}
-          </div>
+          {user.isOnline && (
+            <div className='absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-background' />
+          )}
         </div>
 
+        {/* User Information */}
+        <div className='space-y-1'>
+          {/* Name, Age, Gender, Online Status */}
+          <div className='flex items-center gap-2 flex-wrap'>
+            <h3 className='font-semibold text-base text-foreground' title={user.username}>
+              {user.username || 'Anonymous'}
+            </h3>
+            {'gender' in user && user.gender && age !== null && (
+              <span className='text-sm text-muted-foreground'>
+                {age} {user.gender}
+              </span>
+            )}
+          </div>
+
+          {/* Profession */}
+          {'profession' in user && user.profession && (
+            <p className='text-sm text-foreground font-medium'>{user.profession}</p>
+          )}
+
+          {/* Title/Headline */}
+          {'title' in user && user.title && <p className='text-xs text-muted-foreground line-clamp-2'>{user.title}</p>}
+        </div>
+
+        {/* Tags */}
+        {'tags' in user && user.tags && user.tags.length > 0 && (
+          <div className='flex flex-wrap gap-1 pt-2'>
+            {user.tags.slice(0, 3).map(tag => (
+              <TagPill
+                key={tag._id}
+                tag={{ _id: tag._id, slug: tag.slug, label: tag.label, createdAt: '', updatedAt: '' }}
+                state='existing'
+              />
+            ))}
+          </div>
+        )}
+
         {/* Action buttons */}
-        <div className='flex gap-1 justify-between'>
+        <div className='flex gap-1 justify-between pt-2'>
           <Button
             variant='outline'
             size='sm'
@@ -140,9 +162,9 @@ export function UserTitleCard({ user, className = '' }: UserTitleCardProps) {
             }}
             disabled={addFriendMutation.isPending}
             className='flex-1'
-            aria-label='Add friend'
+            aria-label='Connect'
           >
-            <UserPlus className='h-4 w-4' />
+            <Coffee className='h-4 w-4' />
           </Button>
 
           <Link to={`/chat/${user._id}`} className='flex-1'>
@@ -151,19 +173,6 @@ export function UserTitleCard({ user, className = '' }: UserTitleCardProps) {
             </Button>
           </Link>
         </div>
-
-        {/* Tags */}
-        {'tags' in user && user.tags && user.tags.length > 0 && (
-          <div className='flex flex-wrap gap-1'>
-            {user.tags.slice(0, 3).map(tag => (
-              <TagPill
-                key={tag._id}
-                tag={{ _id: tag._id, slug: tag.slug, label: tag.label, createdAt: '', updatedAt: '' }}
-                state='existing'
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

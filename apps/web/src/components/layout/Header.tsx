@@ -43,14 +43,11 @@ export function Header() {
             {isAuthenticated() && user && (
               <>
                 <DropdownMenu>
-                  <DropdownMenuTrigger className='flex h-8 w-8 items-center justify-center rounded-full bg-muted hover:bg-muted/80 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background'>
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.username || 'User'} className='h-8 w-8 rounded-full' />
-                    ) : (
-                      <span className='text-muted-foreground text-sm' aria-hidden='true'>
-                        {(user.username || '').charAt(0).toUpperCase() || 'U'}
-                      </span>
+                  <DropdownMenuTrigger className='flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none cursor-pointer'>
+                    {user.avatarUrl && (
+                      <img src={user.avatarUrl} alt={user.username || 'User'} className='h-6 w-6 rounded-full' />
                     )}
+                    <span>{user.username || user.email || 'User'}</span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end' className='w-56'>
                     {user.username && (
@@ -75,6 +72,12 @@ export function Header() {
                       <Link to='/settings' className='flex items-center'>
                         <span aria-hidden='true'>⚙️</span>
                         <span>Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to='/bookmarks' className='flex items-center'>
+                        <span aria-hidden='true'>⭐</span>
+                        <span>Bookmarks</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

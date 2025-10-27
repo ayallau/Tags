@@ -17,6 +17,10 @@ const SAMPLE_TAGS = [
   "Node.js",
   "Python",
   "Web Development",
+  "Mobile Apps",
+  "AI & Machine Learning",
+  "Cybersecurity",
+  "Cloud Computing",
 
   // Creative & Arts
   "Photography",
@@ -24,6 +28,10 @@ const SAMPLE_TAGS = [
   "Music Production",
   "Painting",
   "Writing",
+  "Digital Art",
+  "Videography",
+  "Film Making",
+  "Creative Writing",
 
   // Sports & Fitness
   "Running",
@@ -31,45 +39,80 @@ const SAMPLE_TAGS = [
   "Cycling",
   "Basketball",
   "Swimming",
+  "Football",
+  "Tennis",
+  "Gym",
+  "Marathon",
+  "CrossFit",
 
   // Food & Cooking
   "Cooking",
   "Baking",
   "Food Photography",
   "Plant-Based",
+  "Vegetarian",
+  "Vegan",
+  "Wine Tasting",
+  "Cocktail Mixing",
 
   // Travel & Adventure
   "Travel",
   "Hiking",
   "Mountain Biking",
   "Camping",
+  "Backpacking",
+  "Solo Travel",
+  "City Exploration",
+  "Adventure Sports",
 
   // Learning & Education
   "Reading",
   "Languages",
   "Online Learning",
   "Science",
+  "History",
+  "Philosophy",
+  "Self-Development",
 
   // Gaming & Entertainment
   "Gaming",
   "Board Games",
   "Movies",
   "Anime",
+  "Comics",
+  "Streaming",
+  "Podcasts",
 
   // Business & Finance
   "Entrepreneurship",
   "Investing",
   "Personal Finance",
+  "Real Estate",
+  "Stock Trading",
 
   // Lifestyle
   "Minimalism",
   "Sustainable Living",
   "Meditation",
   "Productivity",
+  "Time Management",
+  "Fashion",
+  "Home Decoration",
+
+  // Social & Community
+  "Social Activism",
+  "Volunteering",
+  "Community Building",
+  "Networking",
 
   // Miscellaneous
   "DIY",
   "Gardening",
+  "Pet Care",
+  "Collecting",
+  "Astronomy",
+  "Journaling",
+  "Chess",
 ];
 
 async function seedTags() {

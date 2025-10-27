@@ -77,7 +77,7 @@ export function UserTitleGrid({ className = '', selectedTagId }: UserTitleGridPr
 
   if (isLoading && !allUsers.length) {
     return (
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3'>
         {Array.from({ length: 12 }).map((_, i) => (
           <TileSkeleton key={i} />
         ))}
@@ -96,7 +96,7 @@ export function UserTitleGrid({ className = '', selectedTagId }: UserTitleGridPr
 
   return (
     <div className={className}>
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'>
         {allUsers.map(user => (
           <UserTitleCard key={user._id} user={user} />
         ))}
@@ -104,8 +104,8 @@ export function UserTitleGrid({ className = '', selectedTagId }: UserTitleGridPr
 
       {/* Loading more indicator */}
       {(isFetchingNextPage || isLoading) && (
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3'>
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-3'>
+          {Array.from({ length: 6 }).map((_, i) => (
             <TileSkeleton key={`skeleton-${i}`} />
           ))}
         </div>
