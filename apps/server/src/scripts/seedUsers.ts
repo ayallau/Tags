@@ -52,12 +52,12 @@ function getRandomElement<T>(arr: T[]): T {
 function generateBio(): string {
   const template = getRandomElement(BIO_TEMPLATES);
   const interest = getRandomElement(INTERESTS);
-  
+
   let bio = template;
   // Replace placeholders
   bio = bio.replace("{sport}", interest);
   bio = bio.replace("{art}", interest);
-  
+
   // Add personal touch
   if (Math.random() > 0.5) {
     const city = ["New York", "London", "Tel Aviv", "Tokyo", "Berlin", "Paris"][
@@ -65,7 +65,7 @@ function generateBio(): string {
     ];
     bio += ` Based in ${city}.`;
   }
-  
+
   return bio;
 }
 

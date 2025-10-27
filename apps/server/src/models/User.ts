@@ -30,6 +30,8 @@ const userSchema = new mongoose.Schema(
     },
     // Profile fields
     username: { type: String, unique: true, index: true, sparse: true },
+    firstName: { type: String, required: false },
+    lastName: { type: String, required: false },
     avatarUrl: { type: String, required: false },
     bio: { type: String, maxlength: 500, required: false },
     location: { type: String, required: false },
@@ -68,6 +70,8 @@ export interface IUser extends Document {
   };
   // Profile fields
   username?: string;
+  firstName?: string;
+  lastName?: string;
   avatarUrl?: string;
   bio?: string;
   location?: string;

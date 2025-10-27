@@ -78,42 +78,41 @@ export function UserTitleCard({ user, className = '' }: UserTitleCardProps) {
   };
 
   return (
-    <div className={`border border-border rounded-lg bg-card hover:shadow-lg transition-all ${className}`}>
-      <div className='p-4 space-y-3'>
-        {/* Avatar Section - Large centered avatar */}
-        <div className='relative w-full'>
-          <div className='border-2 border-border rounded-lg p-8 bg-muted/30 flex items-center justify-center aspect-square'>
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.username}
-                className='w-20 h-20 rounded-full object-cover'
-                loading='lazy'
-              />
-            ) : (
-              <div className='w-20 h-20 rounded-full bg-muted flex items-center justify-center border-2 border-border'>
-                <span className='text-4xl'>{'gender' in user ? getGenderAvatar(user.gender) : getGenderAvatar()}</span>
-              </div>
-            )}
-          </div>
+    <div
+      className={`border border-border rounded-lg bg-card hover:shadow-lg transition-all overflow-hidden ${className}`}
+    >
+      {/* Avatar Section - Full width image */}
+      <div className='px-2 pt-2'>
+        <div className='relative w-full h-48 overflow-hidden rounded-lg'>
+          {user.avatarUrl ? (
+            <img src={user.avatarUrl} alt={user.username} className='w-full h-full object-cover' loading='lazy' />
+          ) : (
+            <div className='w-full h-full bg-muted flex items-center justify-center'>
+              <span className='text-6xl'>{'gender' in user ? getGenderAvatar(user.gender) : getGenderAvatar()}</span>
+            </div>
+          )}
           {user.isOnline && (
             <div className='absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full border-2 border-background' />
           )}
         </div>
+      </div>
 
+      <div className='p-4 space-y-3'>
         {/* User Information */}
         <div className='space-y-1'>
-          {/* Name, Age, Gender, Online Status */}
-          <div className='flex items-center gap-2 flex-wrap'>
-            <h3 className='font-semibold text-base text-foreground' title={user.username}>
-              {user.username || 'Anonymous'}
-            </h3>
-            {'gender' in user && user.gender && age !== null && (
+          {/* Name */}
+          <h3 className='font-semibold text-base text-foreground' title={user.username}>
+            {user.username || 'Anonymous'}
+          </h3>
+
+          {/* Age, Gender */}
+          {'gender' in user && user.gender && age !== null && (
+            <div className='flex items-center gap-2'>
               <span className='text-sm text-muted-foreground'>
                 {age} {user.gender}
               </span>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Profession */}
           {'profession' in user && user.profession && (
@@ -121,7 +120,7 @@ export function UserTitleCard({ user, className = '' }: UserTitleCardProps) {
           )}
 
           {/* Title/Headline */}
-          {'title' in user && user.title && <p className='text-xs text-muted-foreground line-clamp-2'>{user.title}</p>}
+          {/* {'title' in user && user.title && <p className='text-xs text-muted-foreground line-clamp-2'>{user.title}</p>} */}
         </div>
 
         {/* Tags */}
@@ -132,6 +131,7 @@ export function UserTitleCard({ user, className = '' }: UserTitleCardProps) {
                 key={tag._id}
                 tag={{ _id: tag._id, slug: tag.slug, label: tag.label, createdAt: '', updatedAt: '' }}
                 state='existing'
+                className='text-xs px-2 py-0.5'
               />
             ))}
           </div>
@@ -169,7 +169,7 @@ export function UserTitleCard({ user, className = '' }: UserTitleCardProps) {
 
           <Link to={`/chat/${user._id}`} className='flex-1'>
             <Button variant='outline' size='sm' className='w-full' onClick={handleChat} aria-label='Start conversation'>
-              <MessageCircle className='h-4 w-4' />
+              <MessageCircle className='h-4 w-6' />
             </Button>
           </Link>
         </div>
