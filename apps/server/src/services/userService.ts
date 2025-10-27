@@ -175,7 +175,9 @@ export async function discoverUsers(
 
   // Fetch users with projection (only needed fields)
   const users = await User.find(filter)
-    .select("_id username avatarUrl isOnline lastVisitAt createdAt tags")
+    .select(
+      "_id username avatarUrl bio location dateOfBirth gender profession title isOnline lastVisitAt createdAt tags"
+    )
     .populate("tags", "slug label")
     .sort(sortOptions)
     .limit(limit + 1); // Fetch one extra to check if more exists
@@ -188,6 +190,12 @@ export async function discoverUsers(
       _id: String(user._id),
       username: user.username,
       avatarUrl: user.avatarUrl,
+      bio: user.bio,
+      location: user.location,
+      dateOfBirth: user.dateOfBirth,
+      gender: user.gender,
+      profession: user.profession,
+      title: user.title,
       isOnline: user.isOnline,
       lastVisitAt: user.lastVisitAt,
       createdAt: user.createdAt,
@@ -242,7 +250,9 @@ export async function getRecentUsers(
 
   // Fetch users with projection (only needed fields)
   const users = await User.find(filter)
-    .select("_id username avatarUrl isOnline lastVisitAt createdAt")
+    .select(
+      "_id username avatarUrl bio location dateOfBirth gender profession title isOnline lastVisitAt createdAt"
+    )
     .sort(sortOptions)
     .limit(limit + 1); // Fetch one extra to check if more exists
 
@@ -254,6 +264,12 @@ export async function getRecentUsers(
       _id: String(user._id),
       username: user.username,
       avatarUrl: user.avatarUrl,
+      bio: user.bio,
+      location: user.location,
+      dateOfBirth: user.dateOfBirth,
+      gender: user.gender,
+      profession: user.profession,
+      title: user.title,
       isOnline: user.isOnline,
       lastVisitAt: user.lastVisitAt,
       createdAt: user.createdAt,

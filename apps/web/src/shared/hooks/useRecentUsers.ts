@@ -9,6 +9,12 @@ export interface RecentUser {
   _id: string;
   username?: string;
   avatarUrl?: string;
+  bio?: string;
+  location?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  profession?: string;
+  title?: string;
   isOnline: boolean;
   lastVisitAt?: string;
   createdAt: string;

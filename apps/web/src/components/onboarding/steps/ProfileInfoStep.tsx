@@ -9,6 +9,10 @@ import { motion } from 'framer-motion';
 interface ProfileInfo {
   bio?: string;
   location?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  profession?: string;
+  title?: string;
 }
 
 interface ProfileInfoStepProps {
@@ -51,7 +55,74 @@ export function ProfileInfoStep({ data, onChange, onNext, onBack }: ProfileInfoS
         <p className='text-muted-foreground'>Let's personalize your profile</p>
       </div>
 
-      <div className='max-w-md mx-auto space-y-4'>
+      <div className='max-w-2xl mx-auto space-y-4'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          {/* Date of Birth */}
+          <div>
+            <label htmlFor='dateOfBirth' className='block text-sm font-medium mb-2'>
+              Date of Birth
+            </label>
+            <input
+              id='dateOfBirth'
+              type='date'
+              value={data.dateOfBirth || ''}
+              onChange={e => onChange({ ...data, dateOfBirth: e.target.value })}
+              max={new Date().toISOString().split('T')[0]}
+              className='w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white'
+            />
+          </div>
+
+          {/* Gender */}
+          <div>
+            <label htmlFor='gender' className='block text-sm font-medium mb-2'>
+              Gender
+            </label>
+            <select
+              id='gender'
+              value={data.gender || ''}
+              onChange={e => onChange({ ...data, gender: e.target.value })}
+              className='w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white'
+            >
+              <option value=''>Select gender</option>
+              <option value='male'>Male</option>
+              <option value='female'>Female</option>
+              <option value='other'>Other</option>
+              <option value='prefer-not-to-say'>Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Profession */}
+        <div>
+          <label htmlFor='profession' className='block text-sm font-medium mb-2'>
+            Profession
+          </label>
+          <input
+            id='profession'
+            type='text'
+            value={data.profession || ''}
+            onChange={e => onChange({ ...data, profession: e.target.value })}
+            className='w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white'
+            placeholder='e.g., Software Developer'
+          />
+        </div>
+
+        {/* Title */}
+        <div>
+          <label htmlFor='title' className='block text-sm font-medium mb-2'>
+            Title
+          </label>
+          <input
+            id='title'
+            type='text'
+            value={data.title || ''}
+            onChange={e => onChange({ ...data, title: e.target.value })}
+            className='w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white'
+            placeholder='e.g., Senior Full Stack Developer'
+            maxLength={100}
+          />
+        </div>
+
         {/* Location */}
         <div>
           <label htmlFor='location' className='block text-sm font-medium mb-2'>

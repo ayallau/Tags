@@ -4,58 +4,16 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { useDiscoverUsers } from '../../shared/hooks/useDiscoverUsers';
 import { useRecentUsers, type RecentUser } from '../../shared/hooks/useRecentUsers';
 import { EmptyState } from '../data/EmptyState';
-import { User as UserIcon } from 'lucide-react';
 import { TileSkeleton } from '../skeletons';
+import { UserTitleCard } from '../users/UserTitleCard';
 import type { UserPreview } from '../../shared/types/user';
 
 interface UserTitleGridProps {
   className?: string;
   selectedTagId?: string | undefined;
-}
-
-function UserTitleCard({ user }: { user: RecentUser | UserPreview }) {
-  return (
-    <Link
-      to={`/profile/${user._id}`}
-      className='group relative block p-3 border border-border rounded-lg hover:shadow-md transition-all hover:scale-105 bg-card'
-    >
-      <div className='flex items-center gap-3'>
-        <div className='relative flex-shrink-0'>
-          {user.avatarUrl ? (
-            <img
-              src={user.avatarUrl}
-              alt={user.username}
-              className='h-12 w-12 rounded-full object-cover border-2 border-background'
-              loading='lazy'
-            />
-          ) : (
-            <div className='h-12 w-12 rounded-full bg-muted flex items-center justify-center border-2 border-background'>
-              <UserIcon className='h-6 w-6 text-muted-foreground' />
-            </div>
-          )}
-          {user.isOnline && (
-            <div className='absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background' />
-          )}
-        </div>
-        <div className='flex-1 min-w-0'>
-          <h3 className='font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors'>
-            {user.username || 'Anonymous'}
-          </h3>
-          <p className='text-xs text-muted-foreground'>
-            {user.isOnline
-              ? 'Online now'
-              : user.lastVisitAt
-                ? `Active ${new Date(user.lastVisitAt).toLocaleDateString()}`
-                : 'Recently joined'}
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
 }
 
 export function UserTitleGrid({ className = '', selectedTagId }: UserTitleGridProps) {
@@ -128,7 +86,7 @@ export function UserTitleGrid({ className = '', selectedTagId }: UserTitleGridPr
   }
 
   if (!allUsers.length && !isLoading) {
-    const title = selectedTagId ? '' : 'No Recent Users';
+    const title = selectedTagId ? 'No Users Found' : 'No Recent Users';
     const description = selectedTagId
       ? 'There are no users with this tag. Try selecting a different tag.'
       : 'There are no active users at the moment. Check back later!';
@@ -138,7 +96,7 @@ export function UserTitleGrid({ className = '', selectedTagId }: UserTitleGridPr
 
   return (
     <div className={className}>
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
         {allUsers.map(user => (
           <UserTitleCard key={user._id} user={user} />
         ))}

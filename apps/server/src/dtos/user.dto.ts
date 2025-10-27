@@ -58,6 +58,22 @@ export const UpdateProfileSchema = z.object({
     .optional()
     .or(z.literal("")),
   avatarUrl: z.string().url("Invalid URL format").or(z.literal("")).optional(),
+  dateOfBirth: z.string().optional().or(z.literal("")),
+  gender: z
+    .string()
+    .max(50, "Gender must be at most 50 characters")
+    .optional()
+    .or(z.literal("")),
+  profession: z
+    .string()
+    .max(100, "Profession must be at most 100 characters")
+    .optional()
+    .or(z.literal("")),
+  title: z
+    .string()
+    .max(150, "Title must be at most 150 characters")
+    .optional()
+    .or(z.literal("")),
   tags: z.array(z.string()).max(20, "Cannot have more than 20 tags").optional(),
   isOnboardingComplete: z.boolean().optional(),
 });

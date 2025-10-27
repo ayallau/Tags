@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema(
     bio: { type: String, maxlength: 500, required: false },
     location: { type: String, required: false },
     photos: [{ type: String }],
+    // Additional profile fields
+    dateOfBirth: { type: Date, required: false, index: true },
+    gender: { type: String, required: false },
+    profession: { type: String, required: false },
+    title: { type: String, required: false },
     // Tags reference
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
     // Status fields
@@ -67,6 +72,11 @@ export interface IUser extends Document {
   bio?: string;
   location?: string;
   photos: Types.Array<string>;
+  // Additional profile fields
+  dateOfBirth?: Date;
+  gender?: string;
+  profession?: string;
+  title?: string;
   tags: Types.Array<Types.ObjectId>;
   // Status fields
   isOnline: boolean;

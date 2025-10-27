@@ -44,6 +44,10 @@ export async function getCurrentUser(
       avatarUrl: user.avatarUrl,
       bio: user.bio,
       location: user.location,
+      dateOfBirth: user.dateOfBirth,
+      gender: user.gender,
+      profession: user.profession,
+      title: user.title,
       photos: user.photos,
       tags:
         (populatedUser?.tags as any[])?.map((tag) => ({
@@ -102,6 +106,20 @@ export async function updateCurrentUser(
     if (updateData.avatarUrl !== undefined)
       updateFields.avatarUrl =
         updateData.avatarUrl === "" ? undefined : updateData.avatarUrl;
+    if (updateData.dateOfBirth !== undefined)
+      updateFields.dateOfBirth =
+        updateData.dateOfBirth === ""
+          ? undefined
+          : new Date(updateData.dateOfBirth);
+    if (updateData.gender !== undefined)
+      updateFields.gender =
+        updateData.gender === "" ? undefined : updateData.gender;
+    if (updateData.profession !== undefined)
+      updateFields.profession =
+        updateData.profession === "" ? undefined : updateData.profession;
+    if (updateData.title !== undefined)
+      updateFields.title =
+        updateData.title === "" ? undefined : updateData.title;
     if (updateData.tags !== undefined) {
       // Convert tag IDs to ObjectIds for Mongoose
       updateFields.tags = updateData.tags.map(
@@ -139,6 +157,10 @@ export async function updateCurrentUser(
       avatarUrl: updatedUser.avatarUrl,
       bio: updatedUser.bio,
       location: updatedUser.location,
+      dateOfBirth: updatedUser.dateOfBirth,
+      gender: updatedUser.gender,
+      profession: updatedUser.profession,
+      title: updatedUser.title,
       photos: updatedUser.photos,
       tags: (updatedUser.tags as any[]).map((tag) => ({
         _id: String(tag._id),

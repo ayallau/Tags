@@ -18,6 +18,10 @@ import { Button } from '../ui/button';
 interface ProfileInfo {
   bio?: string;
   location?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  profession?: string;
+  title?: string;
 }
 
 type OnboardingStep = 'welcome' | 'profile' | 'tags' | 'finish';
@@ -148,6 +152,10 @@ export function OnboardingWizard() {
 
       if (profileInfo.bio) updateData['bio'] = profileInfo.bio;
       if (profileInfo.location) updateData['location'] = profileInfo.location;
+      if (profileInfo.dateOfBirth) updateData['dateOfBirth'] = profileInfo.dateOfBirth;
+      if (profileInfo.gender) updateData['gender'] = profileInfo.gender;
+      if (profileInfo.profession) updateData['profession'] = profileInfo.profession;
+      if (profileInfo.title) updateData['title'] = profileInfo.title;
 
       await updateUserMutation.mutateAsync(updateData);
 
@@ -175,6 +183,10 @@ export function OnboardingWizard() {
 
       if (profileInfo.bio) updateData['bio'] = profileInfo.bio;
       if (profileInfo.location) updateData['location'] = profileInfo.location;
+      if (profileInfo.dateOfBirth) updateData['dateOfBirth'] = profileInfo.dateOfBirth;
+      if (profileInfo.gender) updateData['gender'] = profileInfo.gender;
+      if (profileInfo.profession) updateData['profession'] = profileInfo.profession;
+      if (profileInfo.title) updateData['title'] = profileInfo.title;
       if (selectedTags.length > 0) {
         updateData['tags'] = selectedTags.map(t => t._id);
       }

@@ -3,14 +3,42 @@
  * Displays a single user's preview in Discover/Matches lists
  */
 
-import { User as UserIcon, Bookmark, UserPlus, UserMinus, Shield, EyeOff } from 'lucide-react';
+import { Bookmark, UserPlus, UserMinus, Shield, EyeOff, AlertTriangle, MessageCircle } from 'lucide-react';
 import { TagPill } from '../tags/TagPill';
 import { Button } from '../ui/button';
 import { useAddBookmark } from '../../shared/hooks/useBookmarks';
 import { useAddFriend, useRemoveFriend, useCheckFriend } from '../../shared/hooks/useFriends';
 import { useBlockUser, useHideUser } from '../../shared/hooks/useSettings';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import type { UserPreview } from '../../shared/types/user';
+
+// Helper function to calculate age from date of birth
+function calculateAge(dateOfBirth?: string): number | null {
+  if (!dateOfBirth) return null;
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+// Helper function to get gender avatar
+function getGenderAvatar(gender?: string) {
+  switch (gender?.toLowerCase()) {
+    case 'male':
+      return '👨';
+    case 'female':
+      return '👩';
+    case 'other':
+      return '👤';
+    default:
+      return '👤';
+  }
+}
 
 interface UserCardProps {
   user: UserPreview;
@@ -107,33 +135,55 @@ export function UserCard({
     }
   };
 
+  const handleReport = () => {
+    if (window.confirm(`Are you sure you want to report ${user.username}?`)) {
+      // TODO: Implement report functionality
+      // eslint-disable-next-line no-console
+      console.log('Report user:', user._id);
+    }
+  };
+
+  const age = calculateAge(user.dateOfBirth);
+
   return (
-    <div className={`border border-border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow ${className}`}>
-      {/* Header with avatar and online status */}
-      <div className='flex items-center gap-3'>
-        <div className='relative'>
+    <div
+      className={`border border-border rounded-lg p-4 space-y-4 hover:shadow-lg transition-all bg-card ${className}`}
+    >
+      {/* Header with avatar and basic info */}
+      <div className='flex items-start gap-3'>
+        <div className='relative flex-shrink-0'>
           {user.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.username} className='h-10 w-10 rounded-full object-cover' />
+            <img
+              src={user.avatarUrl}
+              alt={user.username}
+              className='h-20 w-20 rounded-full object-cover border-2 border-border'
+              loading='lazy'
+            />
           ) : (
-            <div className='h-10 w-10 rounded-full bg-muted flex items-center justify-center'>
-              <UserIcon className='h-6 w-6 text-muted-foreground' />
+            <div className='h-20 w-20 rounded-full bg-muted flex items-center justify-center border-2 border-border'>
+              <span className='text-3xl'>{getGenderAvatar(user.gender)}</span>
             </div>
           )}
           {user.isOnline && (
-            <div className='absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background' />
+            <div className='absolute bottom-1 right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-background' />
           )}
         </div>
+
         <div className='flex-1 min-w-0'>
-          <h3 className='font-semibold text-foreground truncate' title={user.username}>
+          <h3 className='font-semibold text-lg text-foreground truncate' title={user.username}>
             {user.username}
           </h3>
-          {user.lastVisitAt && !user.isOnline && (
-            <p className='text-xs text-muted-foreground'>
-              Last seen: {new Date(user.lastVisitAt).toLocaleDateString()}
-            </p>
-          )}
+          <div className='flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground'>
+            {user.gender && <span>{user.gender}</span>}
+            {age !== null && <span>• Age {age}</span>}
+            {user.location && <span>• {user.location}</span>}
+          </div>
+          {user.profession && <p className='text-sm font-medium text-foreground mt-1'>{user.profession}</p>}
+          {user.title && <p className='text-sm text-muted-foreground truncate'>{user.title}</p>}
         </div>
-        <div className='flex gap-1'>
+
+        {/* Action buttons in header */}
+        <div className='flex gap-1 flex-shrink-0'>
           {showBookmarkButton && (
             <Button
               variant='ghost'
@@ -158,29 +208,63 @@ export function UserCard({
               {isFriended ? <UserMinus className='h-4 w-4 text-destructive' /> : <UserPlus className='h-4 w-4' />}
             </Button>
           )}
-          {showBlockButton && (
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={handleBlock}
-              disabled={blockUserMutation.isPending}
-              className='flex-shrink-0'
-              aria-label='Block user'
-            >
-              <Shield className='h-4 w-4 text-destructive' />
+        </div>
+      </div>
+
+      {/* Bio */}
+      {user.bio && (
+        <div className='border-t border-border pt-3'>
+          <p className='text-sm text-muted-foreground line-clamp-3'>{user.bio}</p>
+        </div>
+      )}
+
+      {/* Actions and links */}
+      <div className='flex items-center justify-between pt-2 border-t border-border'>
+        <div className='flex gap-2'>
+          <Link to={`/chat/${user._id}`}>
+            <Button variant='outline' size='sm' aria-label='Start conversation'>
+              <MessageCircle className='h-4 w-4 mr-1' />
+              Message
             </Button>
-          )}
-          {showHideButton && (
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={handleHide}
-              disabled={hideUserMutation.isPending}
-              className='flex-shrink-0'
-              aria-label='Hide user'
-            >
-              <EyeOff className='h-4 w-4' />
-            </Button>
+          </Link>
+        </div>
+        <div className='flex gap-1'>
+          {(showBlockButton || showHideButton) && (
+            <>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={handleReport}
+                className='text-muted-foreground hover:text-foreground'
+                aria-label='Report user'
+              >
+                <AlertTriangle className='h-4 w-4' />
+              </Button>
+              {showHideButton && (
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  onClick={handleHide}
+                  disabled={hideUserMutation.isPending}
+                  className='text-muted-foreground hover:text-foreground'
+                  aria-label='Hide user'
+                >
+                  <EyeOff className='h-4 w-4' />
+                </Button>
+              )}
+              {showBlockButton && (
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  onClick={handleBlock}
+                  disabled={blockUserMutation.isPending}
+                  className='text-muted-foreground hover:text-destructive'
+                  aria-label='Block user'
+                >
+                  <Shield className='h-4 w-4' />
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
