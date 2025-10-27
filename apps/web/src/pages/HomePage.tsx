@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { PopularTagsGrid } from '../components/home/PopularTagsGrid';
 import { UserTitleGrid } from '../components/home/UserTitleGrid';
+import { usePopularTags } from '../shared/hooks/useTags';
 
 export default function HomePage() {
   const [selectedTagId, setSelectedTagId] = useState<string | undefined>(undefined);
+  const { data: popularTags } = usePopularTags({ limit: 30, fillRandom: true });
 
   const handleTagClick = (tagId: string) => {
     // Toggle: if clicking the same tag, deselect it
@@ -14,6 +16,9 @@ export default function HomePage() {
       setSelectedTagId(tagId);
     }
   };
+
+  // Find the selected tag to display its label
+  const selectedTag = popularTags?.find(tag => tag._id === selectedTagId);
 
   return (
     <ProtectedRoute>
@@ -35,7 +40,9 @@ export default function HomePage() {
             </h1> */}
             <h2 className='text-2xl font-bold text-foreground mb-2'>Get to know our community</h2>
             <p className='text-muted-foreground text-sm'>
-              {selectedTagId ? 'People who like {selectedTag}' : 'Connect with people who share your interests'}
+              {selectedTagId && selectedTag
+                ? `People who like ${selectedTag.label}`
+                : 'Travel through our users and discover similar interests'}
             </p>
           </div>
           <UserTitleGrid selectedTagId={selectedTagId} />
